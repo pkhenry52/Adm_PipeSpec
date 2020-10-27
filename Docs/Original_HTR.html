@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <style>
+            label{
+                display: inline-block;
+                width:250px;
+                text-align: right;
+                padding-bottom: 10px;
+            }
+            label.three{
+                    width:100px;
+                    text-align: right;
+                    padding-bottom: 10px;
+            }
+            </style>
+        <title>Hydrostatic Test Report</title>
+    </head>
+    <body>
+        <h1 style="text-align:left;">Hydrostatic Test Report</h1>
+        <hr>
+        <form>
+            <label style="font-size:120%;" for="Proj"><b>Project Description:</b></label>
+            <br>
+            <textarea style="resize:none" name="Proj" rows="4" cols="80" id="ta_1"></textarea>
+            <br>
+            <br>
+            <label style="font-size:120%;" for="WO">Work Order:</label>
+            <input type="text" name="WO" id="t_1" size="10">
+            <br>
+            <label style="font-size:120%;" for="Eng">Project Engineer: </label>
+            <input type="text" name="Eng" id="t_2">              
+            <br>
+            <label style="font-size:120%;" for="Info">Contact Information: </label>
+            <input type="text" name="Info" id="t_3">              
+            <br>
+            <label style="font-size:120%;" for="Fab">Fabricator: </label>
+            <input type="text" name="Fab" id="t_4">
+            <br>
+            <label style="font-size:120%;" for="IsuDate">Date Of Issue</label>
+            <input type="text" name="IsuDate" id="t_5" size="12">
+            <br>
+            <label style="font-size:120%;" for="Spec">Pipe Specification Code: </label>
+            <input type="text" name="Spec" id="t_6" size="10">
+            <br>
+            <label style="font-size:120%;" for="Line">P&amp;ID Line Number:</label>
+            <input type="text" name="Line" id="t_7" size="10">
+            <br>
+            <br>
+            <label style="font-size:120%;" for="Docs"><b>Related Drawings or Documentation: </b></label>
+            <br>
+            <textarea style="resize:none" name="Docs" rows="10" cols="80" id="ta_2"></textarea>
+            <br>
+            <br>
+            <br>
+            <label style="font-size:120%;" for="DP">Design Pressure:</label>
+            <input type="text" name="DP" id="t_8" size="5">
+            (psig)
+            <br>
+            <label style="font-size:120%;" for="HP">Hydro Test Pressure: </label>
+            <input type="text" name="HP" id="t_9" size="5">
+            (psig)
+            <br>
+            <label style="font-size:120%;" for="Min">Hydro Test Temp:</label>
+            <input type="text" name="Min" id="t_10" size="5">
+            (Deg F)
+            <br>
+            <label style="font-size:120%;" for="Max">Hydro Test Media:</label>
+            <input type="text" name="Max" id="t_11" size="10">
+            <br>
+            <label style="font-size:120%;" for="Start">Test Start Time:</label>
+            <input type="text" name="Start" id="t_12" size="6">(hr : min)
+            <br>
+            <label style="font-size:120%;" for="End">Test Sign Off Time:</label>
+            <input type="text" name="End" id="t_13" size="6">
+            <br>
+            <label style="font-size:120%;" for="Time">Test Duration:</label>
+            <input type="text" name="Time" id="t_14" size="6">(minutes)
+            <br>
+            <br>
+            <h3>Gauge Test Record</h3>
+            <label class="three" style="font-size:120%;" for="ID1">Gauge ID:</label>
+            <input type="text" name="ID1" id="t_15" size="6">
+            <label class="three" style="font-size:120%;" for="Cal1">Calibration Date:</label>
+            <input type="text" name="Cal1" id="t_19" size="6">
+            <br>
+            <label class="three" style="font-size:120%;" for="Rng1">Range:</label>
+            <input type="text" name="Rng1" id="t_16" size="6">
+            <br>
+            <label class="three" style="font-size:120%;" for="ID2">Gauge ID:</label>
+            <input type="text" name="ID2" id="t_17" size="6">
+            <label class="three" style="font-size:120%;" for="Cal2">Calibration Date:</label>
+            <input type="text" name="Cal2" id="t_20" size="6">
+            <br>
+            <label class="three" style="font-size:120%;" for="Rng2">Range:</label>
+            <input type="text" name="Rng2" id="t_18" size="6">
+            <br>
+            <br>
+            <label style="font-size:120%;" for="Comt"><b>Comments:</b></label>
+            <br>
+            <textarea style="resize:none" name="Comt" rows="8" cols="80" id="ta_3"></textarea>
+            <br>
+            <br>
+            <br>
+            <label class="three" style="font-size:120%;" for="Reqstr">QC Inspector: </label>
+            <input type="text" name="Reqstr" id="t_21" size="10">
+            <label class="three" style="font-size:120%;" for="QCDate">Date:</label>
+            <input type="text" name="QCDate" id="t_23" size="8">
+            <br>
+            <label class="three" style="font-size:120%;" for="Apprvr">Owner's Inspector: </label>
+            <input type="text" name="Apprvr" id="t_22" size="10">
+            <label class="three" style="font-size:120%;" for="ApvDate">Date:</label>
+            <input type="text" name="ApvDate" id="t_24" size="8">
+            <br>
+        </form>
+        <p>Once data is entered save the form in your browser then
+            pass html file along for further comment and approvals.</p>
+    
+</body></html>

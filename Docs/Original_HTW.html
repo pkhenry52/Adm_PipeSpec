@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            p {
+               word-break: break-all;
+               white-space: normal;
+            }
+            label {
+                display: inline-block;
+                width:200px;
+                text-align: right;
+                padding:5px 10px;
+            }
+            </style>
+        <title>Hydro Test Waiver</title>
+    </head>
+    <body>
+        <h1 style="text-align:left;">Hydro Test Waiver</h1>
+        <hr>
+        <form>
+            <p>This form is to be used when a hydrostatic test may result in; 
+                damage to the process, unsafe conditions, 
+                environmetal issues or damage to the system.
+            </p>
+            <label style="font-size:120%;" for="Proj"><b>Project Description:</b></label>
+            <br>
+            <textarea style="resize:none" name="Proj" rows="4" cols="80" id="ta_1"></textarea>
+            <br>
+            <br>
+            <label style="font-size:120%;" for="WO">Work Order:</label>
+            <input type="text" name="WO" id="t_1" size="10">
+            <br>
+            <label style="font-size:120%;" for="Eng">Project Engineer: </label>
+            <input type="text" name="Eng" id="t_2">              
+            <br>
+            <label style="font-size:120%;" for="Info">Contact Information: </label>
+            <input type="text" name="Info" id="t_3">              
+            <br>
+            <label style="font-size:120%;" for="Fab">Fabricator: </label>
+            <input type="text" name="Fab" id="t_4">
+            <br>
+            <label style="font-size:120%;" for="IsuDate">Date Of Issue</label>
+            <input type="text" name="IsuDate" id="t_5" size="12">
+            <br>
+            <label style="font-size:120%;" for="Spec">Pipe Specification Code: </label>
+            <input type="text" name="Spec" id="t_6" size="10">
+            <br>
+            <label style="font-size:120%;" for="Line">P&ID Line Number:</label>
+            <input type="text" name="Line" id="t_7" size="10">
+            <br>
+            <label style="font-size:120%;" for="Docs"><b>Related Drawings or Documentation: </b></label>
+            <br>
+            <textarea style="resize:none" name="Docs" rows="6" cols="80" id="ta_2"></textarea>
+            <br>
+            <br>
+            <hr>
+            <br>
+        <h2>Operating Conditions</h2>
+            <label style="font-size:120%;" for="DP">Design Pressure:</label>
+            <input type="text" name="DP" id="t_8" size="10">
+            (psig)
+            <br>
+            <label style="font-size:120%;" for="HP">Hydro Test Pressure: </label>
+            <input type="text" name="HP" id="t_9" size="10">
+            (psig)
+            <br>
+            <label style="font-size:120%;" for="Min">Design Temp (min):</label>
+            <input type="text" name="Min" id="t_10" size="10">
+            (Deg F)
+            <br>
+            <label style="font-size:120%;" for="Max">Design Temp (max):</label>
+            <input type="text" name="Max" id="t_11" size="10">
+            (Deg F)
+            <br>
+            <br>
+            <label style="font-size:120%;" for="Reason"><b>Reason for Wiaver:</b></label>
+            <br>
+            <textarea style="resize:none" name="Reason" rows="10" cols="80" id="ta_3"></textarea>
+            <br>
+            <br>
+            <br>
+            <label style="font-size:120%;" for="QC">QC Manager Approval: </label>
+            <input type="text" name="QC" id="t_12">
+            <label style="font-size:120%;" for="QCDate">Date:</label>
+            <input type="text" name="QCDate" id="t_15" size="12">
+            <br>
+            <label style="font-size:120%;" for="Ops">Operations Approval: </label>
+            <input type="text" name="Ops" id="t_13">
+            <label style="font-size:120%;" for="OpsDate">Date:</label>
+            <input type="text" name="OpsDate" id="t_16" size="12">
+            <br>
+            <label style="font-size:120%;" for="PEng">Project Engineer Approval: </label>
+            <input type="text" name="PEng" id="t_14">
+            <label style="font-size:120%;" for="EngDate">Date:</label>
+            <input type="text" name="EngDate" id="t_17" size="12">
+            <br>        
+        
+        </form>
+        <p>Once data is entered save the form in your browser then
+            pass html file along for further comment and approvals.</p>
+    </body>
+</html>
