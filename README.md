@@ -31,31 +31,15 @@ this allows for viewing, printing and changes to the database.
  1. EPCM companies can have numerous different pipe specifications all accessible with this program.
 
  1. The information covered in each commodity pipe specification includes;
-
-                        - Piping
-                        - Fittings (elbows, tees, laterals, reducers etc.)
-                        - Flanges
-                        - Orifice Flanges
-                        - Gasket Packs
-                        - Fasteners
-                        - Unions
-                        - O-lets
-                        - Groove Clamps
-                        - Weld Requirements
-                        - Tubing
-                        - Branch Chart
-                        - Notes for commodities and pipe components.
-                        - Inspection Packs
-                        - Paint Specification
-                        - Insulation
-                        - Gate Valve
-                        - Globe Valve
-                        - Plug Valve
-                        - Ball Valve
-                        - Butterfly Valve
-                        - Piston Check Valve
-                        - Swing Check Valve
-                        - Specials
+               |                    |                    
+ - Piping | - Fittings (elbows, tees, laterals, reducers etc.) | - Flanges
+ - Orifice Flanges | - Gasket Packs | - Fasteners
+ - Unions | - O-lets | - Groove Clamps
+ - Weld Requirements | - Tubing | - Branch Chart
+ - Inspection Packs | - Notes for commodities and pipe components| - Paint Specification
+ - Insulation | - Gate Valve | - Globe Valve
+ - Plug Valve | - Ball Valve | - Butterfly Valve
+ - Piston Check Valve | - Swing Check Valve | - Specials
 
 
 The program has been developed in Python 3.7 and is cross platform with Windows and Linux systems.      The program code is open source and free to be downloaded and modified as desired, all though this is not the intent for most users.  It allows for testing and trial turn out to the users with sample data.
