@@ -17,8 +17,8 @@ and can be seen at the repository https://github.com/pkhenry52/User_PipeSpec, it
 for any use other than viewing and printing.  The second part is used by the Administrator, the repository you are presently viewing, 
 this allows for viewing, printing and changes to the database.
 
-    1. The program allows for easy development, maintenance and update control of a complete plant site commodity pipe specification.
-    2. It has the capability to have a custom commodity pipe specification code of up to 15 characters.  The code outlined for the development of a specification does not have to be that shown on the final documentation.
+ 1.   1. The program allows for easy development, maintenance and update control of a complete plant site commodity pipe specification.
+ 1.   2. It has the capability to have a custom commodity pipe specification code of up to 15 characters.  The code outlined for the development of a specification does not have to be that shown on the final documentation.
     3. The specification is build based on material grade, material type, pressure rating (flange), and corrosion allowance, common in the industry.
     4. The commodity code itself can be unique to each specification or duplicated based on a class such as STM for steam.  This possible because each commodity code is built around a specific set of properties; pressure, temperature, fluid category etc.
     5. A large amount of the data used to build a specification is already built into the data and needs only a click to select.
