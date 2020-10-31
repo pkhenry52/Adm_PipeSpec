@@ -17,4 +17,4 @@ and can be seen at the repository https://github.com/pkhenry52/User_PipeSpec, it
 for any use other than viewing and printing.  The second part is used by the Administrator, the repository you are presently viewing, 
 this allows for viewing, printing and changes to the database.
 
-Additional information can be seen under the Docs directory in the PipeSepcification.pdf
+Additional information can be seen https://github.com/pkhenry52/Adm_PipeSpec/blob/master/Docs/PipeSpecification.pdf
