@@ -20,7 +20,8 @@ this allows for viewing, printing and changes to the database.
  1. The program allows for easy development, maintenance and update control of a complete plant site commodity pipe specification.
  1. It has the capability to have a custom commodity pipe specification code of up to 15 characters.
  1. The specification is build based on material grade, material type, pressure rating (flange), and corrosion allowance, common in the industry.
- 1. The commodity code itself can be unique to each specification or duplicated based on a class such as STM for steam.
+ 1. The commodity code itself can be unique to each specification or duplicated based on a class such as; STM for steam as a commodity code tied to various
+ different steam properties, a specific commodity code such as STMH for high pressure steam properties
  1. A large amount of the data used to build a specification is already built into the data and needs only a click to select.
  1. Information available for the development of a specification is already narrowed down based on the specified material type and grade.
   1. There are numerous forms pre-built in HTML format to hand items which require additional sign off approvals, such as Hydro Test Waivers, Material Substitution Requests, Non-conformance Reports etc.
