@@ -25,16 +25,18 @@ def connect_db(filename):
 class StrUpFrm(wx.Frame):
     # the main stsart up form which begins with the selection of the database
     # followed with the login and then selection of the user screens
-    def __init__(self, parent):
+    def __init__(self):
 
-        wx.Frame.__init__(self, None, wx.ID_ANY,
+        super(StrUpFrm, self).__init__(None, wx.ID_ANY,
                           "Pipe Specification Start Up Screen",
                           size=(400, 350),
                           style=wx.DEFAULT_FRAME_STYLE &
                           ~(wx.MAXIMIZE_BOX | wx.MINIMIZE_BOX))
 
         self.Bind(wx.EVT_CLOSE, self.OnClosePrt)
+        self.InitUI()
 
+    def InitUI(self):
         self.go_value = False
         self.currentDirectory = os.getcwd()
         # create the buttons and bindings
@@ -46,18 +48,18 @@ class StrUpFrm(wx.Frame):
         self.openPaswrdBtn.Bind(wx.EVT_BUTTON, self.Login_Frm)
         self.openPaswrdBtn.Enable(False)
 
-        rdBox1Choices = ['Select one of the Following:',
-                         'Review Support Tables',
+        rdBox1Choices = ['Review Support Tables',
                          'Pipe Wall and Hydro Test Calculations',
                          'Review Commodities and Pipe Specifications',
                          'Manage Passwords and Users']
 
         bxSzr1 = wx.BoxSizer(wx.VERTICAL)
-        self.rdBox1 = wx.RadioBox(self, wx.ID_ANY, "",
+        self.rdBox1 = wx.RadioBox(self, wx.ID_ANY,
+                                  label='Select One of the Following',
                                   choices=rdBox1Choices,
                                   majorDimension=1,
                                   style=wx.RA_SPECIFY_COLS)
-        self.rdBox1.SetSelection(0)
+        self.rdBox1.SetSelection(2)
         self.rdBox1.Bind(wx.EVT_RADIOBOX, self.OnRadioBox1)
         self.rdBox1.Enable(False)
         bxSzr1.Add(self.rdBox1, 0, wx.ALL, 5)
@@ -98,14 +100,14 @@ class StrUpFrm(wx.Frame):
 
     def OnRadioBox1(self, evt):
         call_btn = self.rdBox1.GetSelection()
-        if call_btn == 1:
-            SupportFrms(self, -1)
+        if call_btn == 0:
+            SupportFrms(self)
+        elif call_btn == 1:
+            CalcFrm(self)
         elif call_btn == 2:
-            CalcFrm(self, -1)
+            SpecFrm(self)
         elif call_btn == 3:
-            SpecFrm(self, -1)
-        elif call_btn == 4:
-            CmbLst1(self, -1, 'Password')
+            CmbLst1(self, 'Password')
 
     def OnClosePrt(self, evt):
         if self.go_value is True:
@@ -118,12 +120,16 @@ class LoginFrm(wx.Dialog):
     # the login dialog form
     def __init__(self, parent):
 
-        wx.Dialog.__init__(self, parent, title='Database Password',
+        super(LoginFrm, self).__init__(parent, title='Database Password',
                            size=(350, 200),
                            style=wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER
                                                             | wx.MAXIMIZE_BOX
                                                             | wx.MINIMIZE_BOX))
         self.db_file = parent.path
+        self.InitUI()
+
+    def InitUI(self):
+
         self.Sizer = wx.BoxSizer(wx.VERTICAL)
         usersizer = wx.BoxSizer(wx.HORIZONTAL)
         user_lbl = wx.StaticText(self, -1, size=(160, -1),
@@ -177,19 +183,22 @@ class LoginFrm(wx.Dialog):
 class SpecFrm(wx.Frame):
     # this is the form to build the pipe specification based
     # on a selected commodity property
-    def __init__(self, parent, id, model=None):
+    def __init__(self, parent):
+
+        txt1 = 'Commodity Properties and Related Piping Specification.'
+        txt1 += '\t\tADMINISTRATOR USE ONLY'
+
+        super(SpecFrm, self).__init__(parent, title=txt1)
+
         #  add as this is call up form
         self.parent = parent
         self.lstLft = []
 
-        txt1 = 'Commodity Properties and Related Piping Specification.'
-        txt1 += '\t\tADMINISTRATOR USE ONLY'
-        wx.Frame.__init__(self, parent, title=txt1)
         self.Maximize(True)
         self.SetSizeHints(minW=1125, minH=750)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-        self.pnl = BldFrm(self, -1)
+        self.pnl = BldFrm(self)
 
         sizer_1 = wx.BoxSizer(wx.VERTICAL)
         sizer_1.Add(self.pnl, 1, wx.EXPAND | wx.ALL, 0)
@@ -265,20 +274,24 @@ class SpecFrm(wx.Frame):
 
 class BldFrm(wx.Panel):
     # The panel holding the widgets for the SpecFrm
-    def __init__(self, parent, id, model=None):
+    def __init__(self, parent, model=None):
+        self.model = model
+
+        super(BldFrm, self).__init__(parent)
 
         self.btns = []
         self.lctrls = []
         self.tblname = 'CommodityProperties'
-        font1 = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD)
-
-        wx.Panel.__init__(self, parent)
-
-        self.data = self.LoadComdData()
-
         self.Srch = False
         self.NewSpec = False
         self.ComdPrtyID = None
+
+        self.InitUI()
+
+    def InitUI(self):
+        font1 = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD)
+
+        self.data = self.LoadComdData()
 
         # set up the table column names, width and if
         # column can be edited ie primary autoincrement
@@ -311,10 +324,8 @@ class BldFrm(wx.Panel):
             self.data.sort(key=lambda tup: tup[ID_col])
 
         # use the sorted data to load the dataviewlistcontrol
-        if model is None:
+        if self.model is None:
             self.model = DataMods(self.tblname, self.data)
-        else:
-            self.model = model
         self.dvc.AssociateModel(self.model)
 
         n = 0
@@ -704,7 +715,7 @@ class BldFrm(wx.Panel):
         return data
 
     def OnPipe(self, evt):
-        BldConduit(self, -1, 'Piping', ComdPrtyID=self.ComdPrtyID)
+        BldConduit(self, 'Piping', ComdPrtyID=self.ComdPrtyID)
 
     def OnForm(self, evt):
         slectID = evt.GetId()
@@ -712,6 +723,8 @@ class BldFrm(wx.Panel):
         filenames = ['Original_SOW.html', 'Original_HTR.html',
                      'Original_HTW.html', 'Original_NCR.html',
                      'Original_MSR.html', 'Original_RPS.html']
+        html_path = ''
+        
         # this should be the default location for the files
         os.chdir('..')
         filename = ('file:' + os.sep*2 + os.getcwd() + os.sep + 'Forms'
@@ -726,9 +739,9 @@ class BldFrm(wx.Panel):
             if dlg.ShowModal() == wx.ID_OK:
                 html_path = dlg.GetPath()
             dlg.Destroy()
-
-            filename = ('file:' + os.sep*2 + html_path
-                        + os.sep + filenames[int(fileid)])
+            if html_path != '':
+                filename = ('file:' + os.sep*2 + html_path
+                            + os.sep + filenames[int(fileid)])
 
         brwsr_lst = list(webbrowser._browsers.keys())
         all_brwsrs = ['firefox', 'safari', 'chrome', 'opera',
@@ -762,13 +775,13 @@ class BldFrm(wx.Panel):
                 wx.MessageBox('Problem Locating Web Browser', 'Error', wx.OK)
 
     def OnPDF(self, evt):
-        PDFFrm(self, -1)
+        PDFFrm(self)
 
     def OnMerge(self, evt):
-        MergeFrm(self, -1)
+        MergeFrm(self)
 
     def OnITS(self, evt):
-        BldTrvlSht(self, -1)
+        BldTrvlSht(self)
 
     def OnConvert(self, evt):
         # select the html file to convert
@@ -904,16 +917,16 @@ class BldFrm(wx.Panel):
         wx.MessageBox(msg, 'Title', wx.OK)
 
     def OnRNSImp(self, evt):
-        RPSImport(self, -1)
+        RPSImport(self)
 
     def OnMSRImp(self, evt):
-        MSRImport(self, -1)
+        MSRImport(self)
 
     def OnNCRImp(self, evt):
-        NCRImport(self, -1)
+        NCRImport(self)
 
     def OnCalcs(self, evt):
-        CalcFrm(self, -1)
+        CalcFrm(self)
 
     def FylDilog(self, wildcard, msg, stl):
         self.currentDirectory = os.getcwd()
@@ -945,73 +958,73 @@ class BldFrm(wx.Panel):
             PDF_merge.write(fileobj)
 
     def OnGV(self, evt):
-        BldValve(self, -1, 'GateValve', ComdPrtyID=self.ComdPrtyID)
+        BldValve(self, 'GateValve', ComdPrtyID=self.ComdPrtyID)
 
     def OnPG(self, evt):
-        BldValve(self, -1, 'PlugValve', ComdPrtyID=self.ComdPrtyID)
+        BldValve(self, 'PlugValve', ComdPrtyID=self.ComdPrtyID)
 
     def OnBL(self, evt):
-        BldValve(self, -1, 'BallValve', ComdPrtyID=self.ComdPrtyID)
+        BldValve(self, 'BallValve', ComdPrtyID=self.ComdPrtyID)
 
     def OnGB(self, evt):
-        BldValve(self, -1, 'GlobeValve', ComdPrtyID=self.ComdPrtyID)
+        BldValve(self, 'GlobeValve', ComdPrtyID=self.ComdPrtyID)
 
     def OnBU(self, evt):
-        BldValve(self, -1, 'ButterflyValve', ComdPrtyID=self.ComdPrtyID)
+        BldValve(self, 'ButterflyValve', ComdPrtyID=self.ComdPrtyID)
 
     def OnSWC(self, evt):
-        BldValve(self, -1, 'SwingCheckValve', ComdPrtyID=self.ComdPrtyID)
+        BldValve(self, 'SwingCheckValve', ComdPrtyID=self.ComdPrtyID)
 
     def OnPC(self, evt):
-        BldValve(self, -1, 'PistonCheckValve', ComdPrtyID=self.ComdPrtyID)
+        BldValve(self, 'PistonCheckValve', ComdPrtyID=self.ComdPrtyID)
 
     def OnFtg(self, evt):
-        BldFtgs(self, -1, 'Fittings', ComdPrtyID=self.ComdPrtyID)
+        BldFtgs(self, 'Fittings', ComdPrtyID=self.ComdPrtyID)
 
     def OnBolt(self, evt):
-        BldFst(self, -1, 'Fasteners', ComdPrtyID=self.ComdPrtyID)
+        BldFst(self, 'Fasteners', ComdPrtyID=self.ComdPrtyID)
 
     def OnPaint(self, evt):
-        BldLvl3(self, -1, 'PaintSpec', ComdPrtyID=self.ComdPrtyID)
+        BldLvl3(self, 'PaintSpec', ComdPrtyID=self.ComdPrtyID)
 
     def OnTube(self, evt):
-        BldConduit(self, -1, 'Tubing', ComdPrtyID=self.ComdPrtyID)
+        BldConduit(self, 'Tubing', ComdPrtyID=self.ComdPrtyID)
 
     def OnWeld(self, evt):
-        BldWeld(self, -1, 'WeldRequirements', ComdPrtyID=self.ComdPrtyID)
+        BldWeld(self, 'WeldRequirements', ComdPrtyID=self.ComdPrtyID)
 
     def OnGskt(self, evt):
-        BldLvl3(self, -1, 'GasketPacks', ComdPrtyID=self.ComdPrtyID)
+        BldLvl3(self, 'GasketPacks', ComdPrtyID=self.ComdPrtyID)
 
     def OnBrch(self, evt):
-        BrchFrm(self, -1, ComdPrtyID=self.ComdPrtyID)
+        BrchFrm(self, ComdPrtyID=self.ComdPrtyID)
 
     def OnInspct(self, evt):
-        BldLvl3(self, -1, 'InspectionPacks', ComdPrtyID=self.ComdPrtyID)
+        BldLvl3(self, 'InspectionPacks', ComdPrtyID=self.ComdPrtyID)
 
     def OnInsul(self, evt):
-        BldInsul(self, -1, 'Insulation', ComdPrtyID=self.ComdPrtyID)
+        BldInsul(self, 'Insulation', ComdPrtyID=self.ComdPrtyID)
 
     def OnOFlg(self, evt):
-        BldFtgs(self, -1, 'OrificeFlanges', ComdPrtyID=self.ComdPrtyID)
+        BldFtgs(self, 'OrificeFlanges', ComdPrtyID=self.ComdPrtyID)
 
     def OnFlg(self, evt):
-        BldFtgs(self, -1, 'Flanges', ComdPrtyID=self.ComdPrtyID)
+        BldFtgs(self, 'Flanges', ComdPrtyID=self.ComdPrtyID)
 
     def OnOlet(self, evt):
-        BldFtgs(self, -1, 'OLets', ComdPrtyID=self.ComdPrtyID)
+        BldFtgs(self, 'OLets', ComdPrtyID=self.ComdPrtyID)
 
     def OnUnion(self, evt):
-        BldFtgs(self, -1, 'Unions', ComdPrtyID=self.ComdPrtyID)
+        BldFtgs(self, 'Unions', ComdPrtyID=self.ComdPrtyID)
 
     def OnClmp(self, evt):
-        BldFtgs(self, -1, 'GrooveClamps', ComdPrtyID=self.ComdPrtyID)
+        BldFtgs(self, 'GrooveClamps', ComdPrtyID=self.ComdPrtyID)
 
     def OnSpecl(self, evt):
-        BldSpc_Nts(self, -1, 'Specials', ComdPrtyID=self.ComdPrtyID)
+        BldSpc_Nts(self, 'Specials', ComdPrtyID=self.ComdPrtyID)
 
     def OnNotes(self, evt):
-        BldSpc_Nts(self, -1, 'Notes', ComdPrtyID=self.ComdPrtyID)
+        BldSpc_Nts(self, 'Notes', ComdPrtyID=self.ComdPrtyID)
 
     def PrintFile(self, evt):
         import Report_General
@@ -1403,22 +1416,22 @@ class BldFrm(wx.Panel):
 
     def OnAddCode(self, evt):
         boxnums = [0]
-        CmbLst1(self, -1, 'CommodityCodes')
+        CmbLst1(self, 'CommodityCodes')
         self.ReFillList('CommodityCodes', boxnums)
 
     def OnAddFld(self, evt):
         boxnums = [2]
-        CmbLst1(self, -1, 'FluidCategory')
+        CmbLst1(self, 'FluidCategory')
         self.ReFillList('FluidCategory', boxnums)
 
     def OnAddSpec(self, evt):
         boxnums = [1]
-        PipeMtrSpec(self, -1, 'PipeMaterialSpec')
+        PipeMtrSpc(self, 'PipeMaterialSpec')
         self.ReFillList('PipeMaterialSpec', boxnums)
 
     def OnAddEnd(self, evt):
         boxnums = [3]
-        CmbLst1(self, -1, 'CommodityEnds')
+        CmbLst1(self, 'CommodityEnds')
         self.ReFillList('CommodityEnds', boxnums)
 
     def ReFillList(self, cmbtbl, boxnums):
@@ -1439,8 +1452,8 @@ class BldFrm(wx.Panel):
 
 
 class PDFFrm(wx.Frame):
-    def __init__(self, parent, id):
-        wx.Frame.__init__(self, parent)
+    def __init__(self, parent):
+        super(PDFFrm, self).__init__(parent)
         from wx.lib.pdfviewer import pdfViewer, pdfButtonPanel
         self.Maximize(True)
 
@@ -1449,17 +1462,17 @@ class PDFFrm(wx.Frame):
 
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         vsizer = wx.BoxSizer(wx.VERTICAL)
-        self.buttonpanel = pdfButtonPanel(self, wx.NewId(),
+        self.buttonpanel = pdfButtonPanel(self, wx.ID_ANY,
                                           wx.DefaultPosition,
                                           wx.DefaultSize, 0)
         vsizer.Add(self.buttonpanel, 0,
                    wx.GROW | wx.LEFT | wx.RIGHT | wx.TOP, 5)
-        self.viewer = pdfViewer(self, wx.NewId(), wx.DefaultPosition,
+        self.viewer = pdfViewer(self, wx.ID_ANY, wx.DefaultPosition,
                                 wx.DefaultSize, wx.HSCROLL |
                                 wx.VSCROLL | wx.SUNKEN_BORDER)
         vsizer.Add(self.viewer, 1, wx.GROW | wx.LEFT | wx.RIGHT |
                    wx.BOTTOM, 5)
-        loadbutton = wx.Button(self, wx.NewId(), "Load PDF file",
+        loadbutton = wx.Button(self, wx.ID_ANY, "Load PDF file",
                                wx.DefaultPosition, wx.DefaultSize, 0)
         loadbutton.SetForegroundColour((255, 0, 0))
         vsizer.Add(loadbutton, 0, wx.ALIGN_CENTER | wx.ALL, 5)
@@ -1494,21 +1507,21 @@ class PDFFrm(wx.Frame):
 
 
 class CalcFrm(wx.Frame):
-    def __init__(self, parent, id):
-        self.lctrls = []
-        self.parent = parent
+    def __init__(self, parent):
 
-        wx.Frame.__init__(self, parent, id,
+        super(CalcFrm, self).__init__(parent,
                           title='Wall Thickness and Hydro-Test calculation',
                           size=(580, 720),
                           style=wx.DEFAULT_FRAME_STYLE & ~ (wx.RESIZE_BORDER |
                                                             wx.MAXIMIZE_BOX |
                                                             wx.MINIMIZE_BOX))
+        self.lctrls = []
+        self.parent = parent
 
         self.FrmSizer = wx.BoxSizer(wx.VERTICAL)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-        self.pnl = CalcPnl(self, -1)
+        self.pnl = CalcPnl(self)
         self.FrmSizer.Add(self.pnl, 1, wx.EXPAND)
         self.FrmSizer.Add((35, 10))
         self.FrmSizer.Add((10, 20))
@@ -1530,8 +1543,8 @@ class CalcFrm(wx.Frame):
 
 class CalcPnl(sc.ScrolledPanel):
 
-    def __init__(self, parent, id):
-        sc.ScrolledPanel.__init__(self, parent, size=(560, 630))
+    def __init__(self, parent):
+        super(CalcPnl, self).__init__(parent, size=(560, 630))
 
         self.lctrls = []
 
@@ -1907,7 +1920,7 @@ class CalcPnl(sc.ScrolledPanel):
         return chckH
 
     def OnFlange(self, evt):
-        FlgRatg(self, -1)
+        FlgRatg(self)
 
     def OnClose(self, evt):
         self.GetParent().Enable(True)   # add for child form
@@ -1916,11 +1929,11 @@ class CalcPnl(sc.ScrolledPanel):
 
 
 class FlgRatg(wx.Frame):
-    def __init__(self, parent, id):
+    def __init__(self, parent):
         self.lctrls = []
 
-        wx.Frame.__init__(
-            self, parent, id,
+        super(FlgRatg, self).__init__(
+            parent,
             title='Flange Pressure and Temperature Rating',
             size=(660, 750),
             style=wx.DEFAULT_FRAME_STYLE & ~ (wx.RESIZE_BORDER |
@@ -1934,7 +1947,9 @@ class FlgRatg(wx.Frame):
         self.pressbxs = []
         self.datax = []
         self.datay = []
+        self.InitUI()
 
+    def InitUI(self):
         self.pnl = FlgRtgPnl(self)
 
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -2132,7 +2147,7 @@ class FlgRatg(wx.Frame):
 
 class FlgRtgPnl(wx.Panel):
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+        super(FlgRtgPnl, self).__init__(parent)
         self.figure = Figure()
         self.axes = self.figure.add_subplot(111)
         self.axes.grid(color='b', linestyle='-', linewidth=.2)
@@ -2156,16 +2171,19 @@ class FlgRtgPnl(wx.Panel):
 
 
 class MergeFrm(wx.Frame):
-    def __init__(self, parent, id):
-        from wx.lib.itemspicker import ItemsPicker, \
-             EVT_IP_SELECTION_CHANGED, IP_REMOVE_FROM_CHOICES
+    def __init__(self, parent):
 
-        wx.Frame.__init__(self, parent, title='Select pdf files to merge',
+        super(MergeFrm, self).__init__(parent, title='Select pdf files to merge',
                           size=(725, 550))
 
         self.Bind(wx.EVT_CLOSE, self.OnExit)
-
         self.parent = parent
+        self.InitUI()
+
+    def InitUI(self):
+        from wx.lib.itemspicker import ItemsPicker, \
+             EVT_IP_SELECTION_CHANGED, IP_REMOVE_FROM_CHOICES
+
         self.Sizer = wx.BoxSizer(wx.VERTICAL)
 
         pick_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -2266,7 +2284,14 @@ class MergeFrm(wx.Frame):
 
 class RPSImport(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id):
+    def __init__(self, parent):
+
+        self.frmtitle = 'Request for New Pipe Specification'
+
+        super(RPSImport, self).__init__(parent, title=self.frmtitle,
+                          size=(900, 880))
+
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         self.columnames = []
         self.rec_num = 0
@@ -2274,18 +2299,14 @@ class RPSImport(wx.Frame):
         self.data = []
         self.MainSQL = ''
         self.tblname = 'NewPipeSpec'
-        self.frmtitle = 'Request for New Pipe Specification'
-
         self.MainSQL = 'SELECT * FROM NewPipeSpec'
         self.data = Dbase().Dsqldata(self.MainSQL)
         # specify which listbox column to display in the combobox
         self.showcol = int
 
-        wx.Frame.__init__(self, parent, id, title=self.frmtitle,
-                          size=(900, 880))
+        self.InitUI()
 
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
-
+    def InitUI(self):
         # set the Sizer property (same as SetSizer)
         self.Sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -3071,7 +3092,13 @@ class RPSImport(wx.Frame):
 
 class NCRImport(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id):
+    def __init__(self, parent):
+
+        self.frmtitle = 'Non-conformance Report'
+        super(NCRImport, self).__init__(parent, title=self.frmtitle,
+                                        size=(880, 890))
+
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         self.parent = parent   # add for child form
 
@@ -3081,18 +3108,15 @@ class NCRImport(wx.Frame):
         self.data = []
         self.MainSQL = ''
         self.tblname = 'NonConformance'
-        self.frmtitle = 'Non-conformance Report'
 
         self.MainSQL = 'SELECT * FROM NonConformance'
         self.data = Dbase().Dsqldata(self.MainSQL)
         # specify which listbox column to display in the combobox
         self.showcol = int
 
-        wx.Frame.__init__(self, parent, id, title=self.frmtitle,
-                          size=(880, 890))
+        self.InitUI()
 
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
-
+    def InitUI(self):
         # set the Sizer property (same as SetSizer)
         self.Sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -3903,7 +3927,13 @@ class NCRImport(wx.Frame):
 
 class MSRImport(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id):
+    def __init__(self, parent):
+
+        self.frmtitle = 'Material Substitution Record'
+        super(MSRImport,self).__init__(parent, title=self.frmtitle,
+                          size=(880, 900))
+
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         self.parent = parent   # add for child form
 
@@ -3913,18 +3943,15 @@ class MSRImport(wx.Frame):
         self.data = []
         self.MainSQL = ''
         self.tblname = 'MtrSubRcrd'
-        self.frmtitle = 'Material Substitution Record'
 
         self.MainSQL = 'SELECT * FROM MtrSubRcrd'
         self.data = Dbase().Dsqldata(self.MainSQL)
         # specify which listbox column to display in the combobox
         self.showcol = int
 
-        wx.Frame.__init__(self, parent, id, title=self.frmtitle,
-                          size=(880, 900))
+        self.InitUI()
 
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
-
+    def InitUI(self):
         # set the Sizer property (same as SetSizer)
         self.Sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -4756,27 +4783,29 @@ class MSRImport(wx.Frame):
 
 class BldTrvlSht(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id, model=None):
-
+    def __init__(self, parent, model=None):
+        
         self.parent = parent
-
+        self.model = model
         self.Lvl2tbl = 'InspectionTravelSheet'
-        model1 = None
         self.NoteStr = []
-
         self.ComCode = ''
         self.PipeMtrSpec = ''
-        font1 = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD)
 
         if self.Lvl2tbl.find("_") != -1:
             frmtitle = (self.Lvl2tbl.replace("_", " "))
         else:
             frmtitle = (' '.join(re.findall('([A-Z][a-z]*)', self.Lvl2tbl)))
 
-        wx.Frame.__init__(self, parent, id, title=frmtitle, size=(1200, 875))
-
+        super(BldTrvlSht, self).__init__(parent, title=frmtitle, size=(1200, 875))
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
+        self.InitUI()
+
+    def InitUI(self):
+        model1 = None
+
+        font1 = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD)
         link_fld = 'Timing'
         self.frg_tbl = 'TrvlShtTime'
         self.frg_fld = 'TimeID'
@@ -4897,10 +4926,9 @@ class BldTrvlSht(wx.Frame):
             self.data.sort(key=lambda tup: tup[self.pk_col])
 
     # use the sorted data to load the dataviewlistcontrol
-        if model is None:
+        if self.model is None:
             self.model = DataMods(self.Lvl2tbl, self.data)
-        else:
-            self.model = model
+
         self.dvc.AssociateModel(self.model)
 
         n = 0
@@ -5213,22 +5241,20 @@ class BldTrvlSht(wx.Frame):
 
 class BldConduit(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id, tblname, ComdPrtyID=None, model=None):
+    def __init__(self, parent, tblname, ComdPrtyID=None):
 
         self.parent = parent   # add line for child
+        self.tblname = tblname
+
         self.ComCode = ''
         self.PipeMtrSpec = ''
-
         self.ComdPrtyID = ComdPrtyID
-
         self.columnames = []
         self.rec_num = 0
         self.addbtns = []
         self.lctrls = []
         self.data = []
         self.MainSQL = ''
-        self.tblname = tblname
-        StartQry = None
 
         if self.tblname.find("_") != -1:
             self.frmtitle = (self.tblname.replace("_", " "))
@@ -5241,9 +5267,14 @@ class BldConduit(wx.Frame):
         elif self.tblname == 'Piping':
             frmsz = (1000, 600)
 
-        wx.Frame.__init__(self, parent, id, title=self.frmtitle, size=frmsz)
+        super(BldConduit, self).__init__(parent, title=self.frmtitle, size=frmsz)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+
+        self.InitUI()
+ 
+    def InitUI(self):
+        StartQry = None
 
         if self.ComdPrtyID is not None:
             query = ('''SELECT Commodity_Code,Pipe_Material_Code,End_Connection,
@@ -6125,7 +6156,7 @@ class BldConduit(wx.Frame):
             boxnums = [n*len(self.top_hints_tbls)+callbtn
                        for n in range(0, self.TopRows)]
             cmbtbl = self.top_hints_tbls[callbtn][1]
-            CmbLst1(self, -1, cmbtbl)
+            CmbLst1(self, cmbtbl)
         else:
             # numbers are for the index number for each group of comboboxes
             if self.tblname == 'Piping':
@@ -6134,7 +6165,7 @@ class BldConduit(wx.Frame):
             if self.tblname == 'Tubing':
                 boxnums = [9, 10]
             cmbtbl = self.btm_hints_tbls[callbtn-self.TopRows][1]
-            CmbLst1(self, -1, cmbtbl)
+            CmbLst1(self, cmbtbl)
 
         self.ReFillList(cmbtbl, boxnums)
 
@@ -6375,9 +6406,15 @@ class BldConduit(wx.Frame):
 
 class BldValve(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id, tblname, ComdPrtyID=None, model=None):
+    def __init__(self, parent, tblname, ComdPrtyID=None, model=None):
 
-        self.parent = parent   # add for child form
+        self.parent = parent
+        self.model = model
+
+        self.ComdPrtyID = ComdPrtyID
+        self.mtr = None
+        self.VlvIDs = []
+
         self.tblname = tblname
         if self.tblname.find("_") != -1:
             self.frmtitle = (self.tblname.replace("_", " "))
@@ -6385,14 +6422,12 @@ class BldValve(wx.Frame):
             self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
                              self.tblname)))
 
-        wx.Frame.__init__(self, parent, title=self.frmtitle, size=(870, 680))
+        super(BldValve, self).__init__(parent, title=self.frmtitle, size=(870, 680))
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.InitUI()
 
-        self.ComdPrtyID = ComdPrtyID
-        self.mtr = None
-        self.VlvIDs = []
-
+    def InitUI(self):
         self.data = self.LoadData()
 
         # specify which listbox column to display in the combobox
@@ -6444,10 +6479,9 @@ class BldValve(wx.Frame):
             self.data.sort(key=lambda tup: tup[self.ID_col])
 
         # use the sorted data to load the dataviewlistcontrol
-        if model is None:
+        if self.model is None:
             self.model = DataMods(self.tblname, self.data)
-        else:
-            self.model = model
+
         self.dvc.AssociateModel(self.model)
 
         n = 0
@@ -7409,7 +7443,7 @@ class BldValve(wx.Frame):
 
 class BldFtgs(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id, tblname, ComdPrtyID=None, model=None):
+    def __init__(self, parent, tblname, ComdPrtyID=None):
 
         ''' need to pass the;
         CommmodityProperties.Pipe_Material_Code
@@ -7551,8 +7585,7 @@ class BldFtgs(wx.Frame):
         self.Num_Cols = len(self.lbl_txt)
         self.Num_Rows = len(self.columnames)//self.Num_Cols
 
-        wx.Frame.__init__(
-                          self, parent, id, title=self.frmtitle, size=siz)
+        super(BldFtgs, self).__init__(parent, title=self.frmtitle, size=siz)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -7667,7 +7700,7 @@ class BldFtgs(wx.Frame):
                 xply += .28
             self.lblsizer.Add(self.lbl, 0, wx.ALL | wx.ALIGN_BOTTOM, 10)
             self.lblsizer.Add(self.addbtn, 0, wx.ALIGN_CENTER)
-            self.lblsizer.Add((26*xply, 25))
+            self.lblsizer.Add((int(26*xply), 25))
 
         if self.tblname == 'GrooveClamps':
             self.lblVndr = wx.StaticText(self, -1, label='Vendor',
@@ -8524,11 +8557,11 @@ class BldFtgs(wx.Frame):
             if callbtn in (0, 1):
                 boxnums = (0, 1, 5, 6, 10, 11, 15, 16)
                 cmbtbl = 'Pipe_OD'
-                CmbLst1(self, -1, cmbtbl)
+                CmbLst1(self, cmbtbl)
             elif callbtn == 2:
                 boxnums = (2, 7, 12, 17)
                 cmbtbl = 'EndConnects'
-                CmbLst1(self, -1, cmbtbl)
+                CmbLst1(self, cmbtbl)
             elif callbtn == 3:
                 boxnums = []
                 txt = ('''    NOTE: There are 3 potential
@@ -8584,7 +8617,7 @@ class BldFtgs(wx.Frame):
                             boxnums.append(12+m)
                         m += 1
                 if cmbtbl != '':
-                    CmbLst2(self, -1, cmbtbl)
+                    CmbLst2(self, cmbtbl)
                 boxnums = tuple(boxnums)
 
             elif callbtn == 4:
@@ -8641,14 +8674,14 @@ class BldFtgs(wx.Frame):
                             boxnums.append(16+m)
                         m += 1
                 if cmbtbl != '':
-                    CmbLst1(self, -1, cmbtbl)
+                    CmbLst1(self, cmbtbl)
                 boxnums = tuple(boxnums)
 
         else:
             boxnums = [n*self.Num_Cols+callbtn
                        for n in range(0, self.Num_Rows)]
             cmbtbl = self.cmb_tbls[callbtn]
-            CmbLst1(self, -1, cmbtbl)
+            CmbLst1(self, cmbtbl)
 
         if cmbtbl != '':
             self.ReFillList(cmbtbl, boxnums)
@@ -9190,9 +9223,22 @@ class BldFtgs(wx.Frame):
 
 
 class BldWeld(wx.Frame):
-    def __init__(self, parent, id, tblname, ComdPrtyID=None, model=None):
+    def __init__(self, parent, tblname, ComdPrtyID=None):
 
         self.parent = parent    # add for child form
+
+        self.tblname = tblname
+        if self.tblname.find("_") != -1:
+            self.frmtitle = (self.tblname.replace("_", " "))
+        else:
+            self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
+                             self.tblname)))
+
+        super(BldWeld, self).__init__(parent, title=self.frmtitle,
+                          size=(900, 720))
+
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+
         self.recrd = []
         self.rec_num = 0
         self.sub_rec_num = 0
@@ -9200,22 +9246,11 @@ class BldWeld(wx.Frame):
         self.data = []
         self.subdata = []
         self.btnDict = {}
-        self.tblname = tblname
+
         self.startstrg = ''
         self.field = 'WeldRequirementsID'
         self.MainSQL = ''
         StartQry = None
-
-        if self.tblname.find("_") != -1:
-            self.frmtitle = (self.tblname.replace("_", " "))
-        else:
-            self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
-                             self.tblname)))
-
-        wx.Frame.__init__(self, parent, id, title=self.frmtitle,
-                          size=(900, 720))
-
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         self.ComCode = ''
         self.PipeMtrSpec = ''
@@ -9844,10 +9879,10 @@ class BldWeld(wx.Frame):
 
         if callbtn == 1:
             tbl = 'WeldProcedures'
-            BldProced(self, -1, tbl)
+            BldProced(self, tbl)
         elif callbtn == 0:
             tbl = 'WeldProcesses'
-            CmbLst1(self, -1, tbl)
+            CmbLst1(self, tbl)
 
         self.ReFillList(tbl, callbtn)
 
@@ -10336,14 +10371,13 @@ class BldWeld(wx.Frame):
 
 
 class BldProced(wx.Frame):  # Sub form
-    def __init__(self, parent, id, tblname, ComdPrtyID=None, model=None):
-        wx.Frame.__init__(self, parent, id, title="Welding Procedure",
-                          size=(850, 460))
+    def __init__(self, parent, tblname):
+        super(BldProced, self).__init__(parent, title="Welding Procedure",
+                                        size=(850, 460))
 
         self.Bind(wx.EVT_CLOSE, self.Close)
 
         self.parent = parent
-
         self.rec_num = 0
         self.sub_rec_num = 0
         self.lctrls = []
@@ -10352,7 +10386,9 @@ class BldProced(wx.Frame):  # Sub form
 
         SubSQL = ('SELECT * FROM WeldProcedures')
         self.subdata = Dbase().Dsqldata(SubSQL)
+        self.InitUI()
 
+    def InitUI(self):
         # order of information text label,table name,combo width,
         # combo box true = 1,table ID col name,column name shown in box
         self.hints_tbls = [
@@ -10608,7 +10644,7 @@ class BldProced(wx.Frame):  # Sub form
         elif callbtn == 5:
             cmbtbl = 'WeldQualifyPosition'
 
-        CmbLst1(self, -1, cmbtbl)
+        CmbLst1(self, cmbtbl)
         self.ReFillList(cmbtbl, callbtn)
 
     def EditSubTbl(self):
@@ -10753,14 +10789,36 @@ class BldProced(wx.Frame):  # Sub form
 
 class BldInsul(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id, tblname, ComdPrtyID=None, model=None):
+    def __init__(self, parent, tblname, ComdPrtyID=None):
 
         self.parent = parent  # added for child form
+        self.tblname = tblname
+
+        # there are 29 data IDs making up the Insulation Code
+        self.txtparts = {}
+
+        for i in range(0, 30):
+            self.txtparts[i] = 0
+
+        if self.tblname.find("_") != -1:
+            self.frmtitle = (self.tblname.replace("_", " "))
+        else:
+            self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
+                             self.tblname)))
+        self.txtparts[0] = str(self.tblname[0]) + 'C'
+
+        super(BldInsul, self).__init__(parent, title=self.frmtitle, size=(830, 780))
+
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         self.ComEnds = ''
         self.ComCode = ''
         self.PipeMtrSpec = ''
         self.ComdPrtyID = ComdPrtyID
+
+        self.InitUI()
+
+    def InitUI(self):
 
         if self.ComdPrtyID is not None:
             query = ('''SELECT Commodity_Code,Pipe_Material_Code,
@@ -10779,28 +10837,10 @@ class BldInsul(wx.Frame):
         self.rec_num = 0
         self.addbtns = []
         self.lctrls = []
-        self.tblname = tblname
         self.restore = False
         self.bxdict = {}
         self.DsqlFtg = ''
         StartQry = None
-
-        # there are 29 data IDs making up the Insulation Code
-        self.txtparts = {}
-
-        for i in range(0, 30):
-            self.txtparts[i] = 0
-
-        if self.tblname.find("_") != -1:
-            self.frmtitle = (self.tblname.replace("_", " "))
-        else:
-            self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
-                             self.tblname)))
-        self.txtparts[0] = str(self.tblname[0]) + 'C'
-
-        wx.Frame.__init__(self, parent, title=self.frmtitle, size=(830, 780))
-
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         font1 = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD)
 
@@ -11483,7 +11523,7 @@ class BldInsul(wx.Frame):
         # numbers are for the index number for each group of comboboxes
         boxnums = [n*self.Num_Cols+callbtn for n in range(0, self.Num_Rows)]
         cmbtbl = self.cmb_tbls[callbtn]
-        CmbLst1(self, -1, cmbtbl)
+        CmbLst1(self, cmbtbl)
         self.ReFillList(cmbtbl, boxnums)
 
     def ReFillList(self, cmbtbl, boxnums):
@@ -11825,27 +11865,27 @@ class BldInsul(wx.Frame):
 
     def OnAddJkt(self, evt):
         boxnums = [0]
-        CmbLst1(self, -1, 'InsulationJacket')
+        CmbLst1(self, 'InsulationJacket')
         self.ReFillList('InsulationJacket', boxnums)
 
     def OnAddSuf(self, evt):
         boxnums = [1]
-        CmbLst1(self, -1, 'PaintPrep')
+        CmbLst1(self, 'PaintPrep')
         self.ReFillList('PaintPrep', boxnums)
 
     def OnAddCls(self, evt):
         boxnums = [2]
-        CmbLst1(self, -1, 'InsulationClass')
+        CmbLst1(self, 'InsulationClass')
         self.ReFillList('InsulationClass', boxnums)
 
     def OnAddAdh(self, evt):
         boxnums = [3]
-        CmbLst1(self, -1, 'InsulationAdhesive')
+        CmbLst1(self, 'InsulationAdhesive')
         self.ReFillList('InsulationAdhesive', boxnums)
 
     def OnAddSel(self, evt):
         boxnums = [4]
-        CmbLst1(self, -1, 'InsulationSealer')
+        CmbLst1(self, 'InsulationSealer')
         self.ReFillList('InsulationSealer', boxnums)
 
     def OnCmbOpen(self, evt):
@@ -11986,15 +12026,16 @@ class BldInsul(wx.Frame):
         self.Destroy()
 
 
-class PipeMtrSpec(wx.Frame):
+class PipeMtrSpc(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id, tblname, ComdPrtyID=None, model=None):
+    def __init__(self, parent, tblname):
 
         self.parent = parent
         self.tblname = tblname
         self.lctrls = []
 
-        wx.Frame.__init__(self, parent, title="Pipe Specification Code",
+        super(PipeMtrSpc, self).__init__(
+                          parent, title="Pipe Specification Code",
                           style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER,
                           size=(680, 320))
 
@@ -12239,27 +12280,27 @@ class PipeMtrSpec(wx.Frame):
 
     def OnAddClass(self, evt):
         boxnums = 1
-        CmbLst1(self, -1, 'ANSI_Rating')
+        CmbLst1(self, 'ANSI_Rating')
         self.ReFillList('ANSI_Rating', boxnums)
 
     def OnAddType(self, evt):
         boxnums = 2
-        CmbLst1(self, -1, 'MaterialType')
+        CmbLst1(self, 'MaterialType')
         self.ReFillList('MaterialType', boxnums)
 
     def OnAddGrade(self, evt):
         boxnums = 3
-        BldMtr(self, -1, 'MaterialGrade')
+        BldMtr(self, 'MaterialGrade')
         self.ReFillList('MaterialGrade', boxnums)
 
     def OnAddCor(self, evt):
         boxnums = 4
-        CmbLst1(self, -1, 'CorrosionAllowance')
+        CmbLst1(self, 'CorrosionAllowance')
         self.ReFillList('CorrosionAllowance', boxnums)
 
     def OnAddSpecial(self, evt):
         boxnums = 5
-        CmbLst1(self, -1, 'SpecialCase')
+        CmbLst1(self, 'SpecialCase')
         self.ReFillList('SpecialCase', boxnums)
 
     def ReFillList(self, cmbtbl, boxnum):
@@ -12564,10 +12605,20 @@ class PipeMtrSpec(wx.Frame):
 
 class BldFst(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id, tblname, ComdPrtyID=None, model=None):
+    def __init__(self, parent, tblname, ComdPrtyID=None):
 
         # add line for child parent form
         self.parent = parent
+        self.tblname = tblname
+
+        if self.tblname.find("_") != -1:
+            self.frmtitle = (self.tblname.replace("_", " "))
+        else:
+            self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
+                             self.tblname)))
+
+        super(BldFst, self).__init__(parent, title=self.frmtitle,
+                          size=(730, 430))
 
         self.ComdPrtyID = ComdPrtyID
         self.PipeMtrSpec = ''
@@ -12578,16 +12629,6 @@ class BldFst(wx.Frame):
         self.MainSQL = ''
         self.rec_num = 0
         StartQry = None
-
-        self.tblname = tblname
-        if self.tblname.find("_") != -1:
-            self.frmtitle = (self.tblname.replace("_", " "))
-        else:
-            self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
-                             self.tblname)))
-
-        wx.Frame.__init__(self, parent, id, title=self.frmtitle,
-                          size=(730, 430))
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -13232,14 +13273,14 @@ class BldFst(wx.Frame):
     def OnAddBlt(self, evt):
         boxnums = (0, 1)
         cmbtbl = 'BoltMaterial'
-        CmbLst1(self, -1, cmbtbl)
+        CmbLst1(self, cmbtbl)
 
         self.ReFillList(cmbtbl, boxnums)
 
     def OnAddNut(self, evt):
         boxnums = (0, 1)
         cmbtbl = 'NutMaterial'
-        CmbLst1(self, -1, cmbtbl)
+        CmbLst1(self, cmbtbl)
 
         self.ReFillList(cmbtbl, boxnums)
 
@@ -13299,7 +13340,7 @@ class BldFst(wx.Frame):
 
 class BldLvl3(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id, tblname, ComdPrtyID=None, model=None):
+    def __init__(self, parent, tblname, ComdPrtyID=None):
 
         self.parent = parent   # add for child parent form
 
@@ -13377,7 +13418,7 @@ class BldLvl3(wx.Frame):
             self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
                              self.tblname)))
 
-        wx.Frame.__init__(self, parent, id, title=self.frmtitle, size=frmSize)
+        super(BldLvl3, self).__init__(parent, title=self.frmtitle, size=frmSize)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -13776,11 +13817,11 @@ class BldLvl3(wx.Frame):
         self.recnum2.SetLabel(str(self.rec_num+1))
 
     def OnAddcmb1(self, evt):
-        CmbLst1(self, -1, self.frgtbl1)
+        CmbLst1(self, self.frgtbl1)
         self.ReFillList(0, self.frgtbl1)
 
     def OnAddcmb2(self, evt):
-        CmbLst1(self, -1, self.frgtbl2)
+        CmbLst1(self, self.frgtbl2)
         self.ReFillList(1, self.frgtbl2)
 
     def ReFillList(self, combo, tbl):
@@ -14101,18 +14142,19 @@ class BldLvl3(wx.Frame):
 
 class BrchFrm(wx.Frame):
 
-    def __init__(self, parent, id, ComdPrtyID=None):
+    def __init__(self, parent, ComdPrtyID=None):
         self.parent = parent
 
-        wx.Frame.__init__(
-            self, parent, wx.ID_ANY, title='Branch Chart Specifications',
-            size=(790, 640))
+        super(BrchFrm, self).__init__(
+                          parent,
+                          title='Branch Chart Specifications',
+                          size=(790, 640))
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         self.FrmSizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.pnl = BrchPnl(self, -1, ComdPrtyID)
+        self.pnl = BrchPnl(self, ComdPrtyID)
         self.FrmSizer.Add(self.pnl, 1, wx.EXPAND)
         self.FrmSizer.Add((10, 20))
         self.pnl.b5.Bind(wx.EVT_BUTTON, self.OnClose)
@@ -14134,15 +14176,17 @@ class BrchFrm(wx.Frame):
 
 
 class BrchPnl(sc.ScrolledPanel):
-    def __init__(self, parent, id, ComdPrtyID):
-        sc.ScrolledPanel.__init__(self, parent, size=(760, 550))
-
-        font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-        font1 = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+    def __init__(self, parent, ComdPrtyID):
+        super(BrchPnl, self).__init__(parent, size=(760, 550))
 
         self.tblname = 'BranchCriteria'
         self.ComdPrtyID = ComdPrtyID
 
+        self.InitUI()
+
+    def InitUI(self):
+        font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+        font1 = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD)
         query = ('''SELECT Commodity_Code,Pipe_Material_Code, Pipe_Code,
                  End_Connection FROM CommodityProperties WHERE
                  CommodityPropertyID = ''' + str(self.ComdPrtyID))
@@ -14756,29 +14800,31 @@ class BrchPnl(sc.ScrolledPanel):
 
 class BldSpc_Nts(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id, tblname, ComdPrtyID=None, model=None):
+    def __init__(self, parent, tblname, ComdPrtyID=None, model=None):
 
         self.parent = parent
-
+        self.ComdPrtyID = ComdPrtyID
         # set up the table column names, width and if column can be
         # edited ie primary autoincrement
         self.Lvl2tbl = tblname
-        model1 = None
-        self.lctrls = []
-        self.ComCode = ''
-        self.PipeMtrSpec = ''
-        font1 = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD)
-
-        self.ComdPrtyID = ComdPrtyID
+        self.model = model
 
         if self.Lvl2tbl.find("_") != -1:
             frmtitle = (self.Lvl2tbl.replace("_", " "))
         else:
             frmtitle = (' '.join(re.findall('([A-Z][a-z]*)', self.Lvl2tbl)))
 
-        wx.Frame.__init__(self, parent, id, title=frmtitle, size=(1200, 900))
-
+        super(BldSpc_Nts, self).__init__(parent, title=frmtitle, size=(1200, 900))
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+
+        self.InitUI()
+
+    def InitUI(self):
+        self.lctrls = []
+        self.ComCode = ''
+        self.PipeMtrSpec = ''
+        font1 = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD)
+        model1 = None
 
         if self.ComdPrtyID is not None:
             query = ('''SELECT Commodity_Code,Pipe_Material_Code,Pipe_Code FROM
@@ -14966,10 +15012,9 @@ class BldSpc_Nts(wx.Frame):
             self.data.sort(key=lambda tup: tup[self.pk_col])
 
         # use the sorted data to load the dataviewlistcontrol
-        if model is None:
+        if self.model is None:
             self.model = DataMods(self.Lvl2tbl, self.data)
-        else:
-            self.model = model
+
         self.dvc.AssociateModel(self.model)
 
         n = 0
@@ -15342,7 +15387,7 @@ class BldSpc_Nts(wx.Frame):
                           wx.OK | wx.ICON_INFORMATION)
 
     def OnAddcmb1(self, evt):
-        CmbLst1(self, -1, self.frg_tbl)
+        CmbLst1(self, self.frg_tbl)
         self.ReFillList(0, self.frg_tbl)
 
     def ReFillList(self, combo, tbl):
@@ -15538,15 +15583,17 @@ class BldSpc_Nts(wx.Frame):
 
 
 class SupportFrms(wx.Frame):
-    def __init__(self, parent, id):
+    def __init__(self, parent):
 
-        wx.Frame.__init__(self, parent, id, title='Direct Table Modification',
+        super(SupportFrms, self).__init__(parent, title='Direct Table Modification',
                           size=(870, 700))
 
         self.parent = parent   # add for child parent form
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.InitUI()
 
+    def InitUI(self):
         # the table names are modified to become
         # the button name
         TableList1 = [
@@ -15563,7 +15610,7 @@ class SupportFrms(wx.Frame):
             'TrvlShtTime', 'TubeMaterial', 'TubeSize', 'TubeValveMatr',
             'TubeWall', 'UnionSeats', 'ValveEnds', 'WedgeType',
             'WeldFiller', 'WeldFillerGroup', 'WeldMaterialGroup',
-            'WeldProcessList', 'Weld_WCQ_Card', 'WeldProcesses',
+            'WeldProcessList', 'WeldProcesses',
             'WeldQualifyPosition', 'WeldQualifyThickness']
 
         rdBox1Choices = []
@@ -15694,25 +15741,25 @@ class SupportFrms(wx.Frame):
         # table/form name to open
         if self.rdBox1.GetStringSelection() != 'None':
             tablename = (self.tbl_bt1.get(self.rdBox1.GetStringSelection()))
-            CmbLst1(self, -1, tablename)
+            CmbLst1(self, tablename)
 
     def OnRadioBox2(self, evt):
         if self.rdBox2.GetStringSelection() != 'None':
             tablename = (self.tbl_bt2.get(self.rdBox2.GetStringSelection()))
             if tablename in ['PipeMaterial', 'ButtWeldMaterial',
                              'ForgedMaterial']:
-                BldMtr(self, -1, tablename)
+                BldMtr(self, tablename)
             elif tablename == 'WeldRequirements':
-                BldWeld(self, -1, tablename)
+                BldWeld(self, tablename)
             elif tablename == 'WeldProcedures':
-                BldProced(self, -1, tablename)
+                BldProced(self, tablename)
             else:
-                CmbLst2(self, -1, tablename)
+                CmbLst2(self, tablename)
 
     def OnRadioBox3(self, evt):
         if self.rdBox3.GetStringSelection() != 'None':
             tablename = (self.tbl_bt3.get(self.rdBox3.GetStringSelection()))
-            BldValve(self, -1, tablename)
+            BldValve(self, tablename)
 
     def OnRadioBox4(self, evt):
         # use the selected raio button to specify the corresponding
@@ -15720,14 +15767,14 @@ class SupportFrms(wx.Frame):
         if self.rdBox4.GetStringSelection() != 'None':
             tablename = (self.tbl_bt4.get(self.rdBox4.GetStringSelection()))
             if tablename == 'NewPipeSpec':
-                RPSImport(self, -1)
+                RPSImport(self)
             elif tablename == 'NonConformance':
-                NCRImport(self, -1)
+                NCRImport(self)
             elif tablename == 'MtrSubRcrd':
-                MSRImport(self, -1)
+                MSRImport(self)
 
     def OnMtrSpec(self, evt):
-        PipeMtrSpec(self, -1, 'PipeMaterialSpec')
+        PipeMtrSpc(self, 'PipeMaterialSpec')
         self.rb1.SetValue(0)
 
     def OnClose(self, evt):
@@ -15739,18 +15786,13 @@ class SupportFrms(wx.Frame):
 
 class BldMtr(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id, tblname, ComdPrtyID=None, model=None):
+    def __init__(self, parent, tblname, ComdPrtyID=None, model=None):
 
-        self.parent = parent   # add line for child parent form
-
-        self.ComCode = ''
-        self.PipeMtrSpec = ''
+        self.parent = parent
+        self.model = model
         # set up the table column names, width and if column can be
         # edited ie primary autoincrement
         self.tblname = tblname
-        self.frg_tbl = 'PipeMaterialSpec'
-        self.edit_data = []
-
         # commodity property ID linked to pipespecification
         self.ComdPrtyID = ComdPrtyID
 
@@ -15759,9 +15801,14 @@ class BldMtr(wx.Frame):
         else:
             frmtitle = (' '.join(re.findall('([A-Z][a-z]*)', self.tblname)))
 
-        wx.Frame.__init__(self, parent, title=frmtitle, size=(680, 500))
+        super(BldMtr, self).__init__(parent, title=frmtitle, size=(680, 500))
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+
+        self.ComCode = ''
+        self.PipeMtrSpec = ''
+        self.frg_tbl = 'PipeMaterialSpec'
+        self.edit_data = []
 
         if self.ComdPrtyID is not None:
             query = ('''SELECT Commodity_Code, Pipe_Material_Code,
@@ -15864,10 +15911,8 @@ class BldMtr(wx.Frame):
         self.Bind(dv.EVT_DATAVIEW_ITEM_VALUE_CHANGED,
                   self.OnValueChanged, self.dvc)
         # use the sorted data to load the dataviewlistcontrol
-        if model is None:
+        if self.model is None:
             self.model = DataMods(self.tblname, self.data, self.edit_data)
-        else:
-            self.model = model
         self.dvc.AssociateModel(self.model)
 
         n = 0
@@ -16208,7 +16253,7 @@ class BldMtr(wx.Frame):
 
 
 class CmbLst1(wx.Frame):
-    def __init__(self, parent, id, Lvl1tbl, ComdPrtyID=None, model=None):
+    def __init__(self, parent, Lvl1tbl, model=None):
         '''Class to build the popup forms for the tables selected
         by the addbtn next to each combo box
         Routine to build form and populate grid
@@ -16217,9 +16262,9 @@ class CmbLst1(wx.Frame):
 
         self.parent = parent
         self.Lvl1tbl = Lvl1tbl
+        self.model = model
 
         self.tblinfo = []
-
         self.tblinfo = Dbase(self.Lvl1tbl).Fld_Size_Type()
         self.ID_col = self.tblinfo[1]
         self.colms = self.tblinfo[3]
@@ -16244,9 +16289,13 @@ class CmbLst1(wx.Frame):
             frmwdth = 180
         frmSize = (frmwdth*5, 350)
 
-        wx.Frame.__init__(self, parent, -1, title=frmtitle, size=frmSize)
+        super(CmbLst1, self).__init__(parent, title=frmtitle, size=frmSize)
 
         self.Bind(wx.EVT_CLOSE, self.Close)
+
+        self.InitUI()
+
+    def InitUI(self):
 
         self.MainSQL = 'SELECT * FROM ' + self.Lvl1tbl
         self.data = Dbase().Dsqldata(self.MainSQL)
@@ -16272,10 +16321,9 @@ class CmbLst1(wx.Frame):
             self.data.sort(key=lambda tup: tup[self.ID_col])
 
         # use the sorted data to load the dataviewlistcontrol
-        if model is None:
+        if self.model is None:
             self.model = DataMods(self.Lvl1tbl, self.data)
-        else:
-            self.model = model
+
         self.dvc.AssociateModel(self.model)
 
         n = 0
@@ -16496,9 +16544,10 @@ class CmbLst1(wx.Frame):
 
 class CmbLst2(wx.Frame):
     '''Routine to build form and populate grid'''
-    def __init__(self, parent, id, LVl2tbl, ComdPrtyID=None, model=None):
+    def __init__(self, parent, LVl2tbl, model=None):
 
         self.parent = parent
+        self.model = model
         # set up the table column names, width and if column can be
         # edited ie primary autoincrement
         self.Lvl2tbl = LVl2tbl
@@ -16598,7 +16647,7 @@ class CmbLst2(wx.Frame):
         else:
             frmSize = (1200, 450)
 
-        wx.Frame.__init__(self, parent, id, title=frmtitle, size=frmSize)
+        super(CmbLst2, self).__init__(parent, title=frmtitle, size=frmSize)
 
         self.Bind(wx.EVT_CLOSE, self.Close)
 
@@ -16629,10 +16678,9 @@ class CmbLst2(wx.Frame):
             self.data.sort(key=lambda tup: tup[self.pk_col])
 
         # use the sorted data to load the dataviewlistcontrol
-        if model is None:
+        if self.model is None:
             self.model = DataMods(self.Lvl2tbl, self.data, self.edit_data)
-        else:
-            self.model = model
+
         self.dvc.AssociateModel(self.model)
 
         if link_fld.find("_") != -1:
@@ -17409,7 +17457,7 @@ class Dbase(object):
 
 if __name__ == "__main__":
     app = wx.App(False)
-    frame = StrUpFrm(None)
+    frame = StrUpFrm()
     frame.Show()
     frame.CenterOnScreen()
     app.MainLoop()
