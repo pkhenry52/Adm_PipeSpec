@@ -48,7 +48,8 @@ class StrUpFrm(wx.Frame):
         self.openPaswrdBtn.Bind(wx.EVT_BUTTON, self.Login_Frm)
         self.openPaswrdBtn.Enable(False)
 
-        rdBox1Choices = ['Review Support Tables',
+        rdBox1Choices = ['None',
+                         'Review Support Tables',
                          'Pipe Wall and Hydro Test Calculations',
                          'Review Commodities and Pipe Specifications',
                          'Manage Passwords and Users']
@@ -59,7 +60,7 @@ class StrUpFrm(wx.Frame):
                                   choices=rdBox1Choices,
                                   majorDimension=1,
                                   style=wx.RA_SPECIFY_COLS)
-        self.rdBox1.SetSelection(2)
+        self.rdBox1.SetSelection(0)
         self.rdBox1.Bind(wx.EVT_RADIOBOX, self.OnRadioBox1)
         self.rdBox1.Enable(False)
         bxSzr1.Add(self.rdBox1, 0, wx.ALL, 5)
@@ -100,13 +101,13 @@ class StrUpFrm(wx.Frame):
 
     def OnRadioBox1(self, evt):
         call_btn = self.rdBox1.GetSelection()
-        if call_btn == 0:
+        if call_btn == 1:
             SupportFrms(self)
-        elif call_btn == 1:
-            CalcFrm(self)
         elif call_btn == 2:
-            SpecFrm(self)
+            CalcFrm(self)
         elif call_btn == 3:
+            SpecFrm(self)
+        elif call_btn == 4:
             CmbLst1(self, 'Password')
 
     def OnClosePrt(self, evt):
