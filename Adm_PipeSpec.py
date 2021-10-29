@@ -828,7 +828,7 @@ class BldFrm(wx.Panel):
                 return
             else:
                 titl = [ttl.get_text() for ttl in soup.select('h1')][0]
-            
+
             # get all the text input values
             for item in soup.find_all("input", {"type": "text"}):
                 id_txt.append(item.get('id'))
