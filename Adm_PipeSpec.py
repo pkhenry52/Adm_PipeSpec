@@ -1682,7 +1682,7 @@ class CalcPnl(sc.ScrolledPanel):
                                lctrls=self.lctrls))
         self.Bind(wx.EVT_COMBOBOX_CLOSEUP, self.WallThk, self.cmbSch)
         self.cmbSch.Disable()
-        self.noteSch = wx.TextCtrl(self, size=(60, -1), value='Sch',
+        self.noteSch = wx.TextCtrl(self, size=(100, -1), value='Sch',
                                    style=wx.TE_READONLY | wx.TE_LEFT)
         self.cmbsizer2.Add(noteOD, 0, wx.LEFT | wx.ALIGN_CENTER_VERTICAL, 15)
         self.cmbsizer2.Add(self.cmbOD, 0, wx.LEFT |
