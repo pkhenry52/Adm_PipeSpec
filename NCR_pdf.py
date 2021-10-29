@@ -189,8 +189,3 @@ class NCRForm:
         frmRgt2.addFromList(inpt, basepg)
 
         basepg.save()
-
-'''
-if __name__ == '__main__':
-    NCRForm().create()
-'''

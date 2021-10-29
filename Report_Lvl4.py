@@ -39,7 +39,6 @@ class Report:
         self.width, self.height = letter
         self.textAdjust = 6.5
 
-
         if datatable.find("_") != -1:
             self.tblname = (datatable.replace("_", " "))
         else:

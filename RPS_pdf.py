@@ -55,8 +55,12 @@ class RPSForm:
 
         # First text area box
         dscrp = []
-        txt = '''This form is to be used when a new commodity property has been approved and needs a related piping specification.
-        Do not submit this form until the related commodity property has been approved by operations and/or process engineering.'''
+        txt1 = 'This form is to be used when a new commodity property '
+        txt2 = 'has been approved and needs a related piping specification.'
+        txt3 = 'Do not submit this form until the related commodity '
+        txt4 = 'property has been approved by operations '
+        txt5 = 'and/or process engineering.'
+        txt = txt1 + txt2 + txt3 + txt4 + txt5
         dscrp.append(Paragraph(txt, nrm))
         frm1 = Frame(15*mm, 240*mm, width=180*mm, height=25*mm, showBoundary=0)
         frm1.addFromList(dscrp, basepg)
@@ -103,10 +107,12 @@ class RPSForm:
         dscrp = []
         dscrp.append(Paragraph('<b><i>Similar Piping Specification:</i></b>',
                                style=styles['Right']))
-        dscrp.append(Paragraph('<b><i>Maximum Operating Pressure (psig):</i></b>',
-                               style=styles['Right']))
-        dscrp.append(Paragraph('<b><i>Maximum Operating Temperature (F):</i></b>',
-                               style=styles['Right']))
+        dscrp.append(Paragraph(
+            '<b><i>Maximum Operating Pressure (psig):</i></b>',
+            style=styles['Right']))
+        dscrp.append(Paragraph(
+            '<b><i>Maximum Operating Temperature (F):</i></b>',
+            style=styles['Right']))
         dscrp.append(Paragraph('<b><i>Maximum Design Pressure (psig):</i></b>',
                                style=styles['Right']))
         dscrp.append(Paragraph('<b><i>Maximum Design Temperature (F):</i></b>',

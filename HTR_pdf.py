@@ -178,9 +178,11 @@ class HTRForm:
 
         # text box labels for gage info
         info = []
-        info.append(Paragraph('<b><i>Calibration Date:</i></b>', style=styles['Right']))
+        info.append(Paragraph('<b><i>Calibration Date:</i></b>',
+                              style=styles['Right']))
         info.append(Spacer(1, 28))
-        info.append(Paragraph('<b><i>Calibration Date:</i></b>', style=styles['Right']))
+        info.append(Paragraph('<b><i>Calibration Date:</i></b>',
+                              style=styles['Right']))
         frmRgt1 = Frame(100*mm, 117*mm, width=35*mm, height=50*mm,
                         showBoundary=0)
         frmRgt1.addFromList(info, basepg)
@@ -226,7 +228,8 @@ class HTRForm:
         # text box labels
         info = []
         for n in range(2):
-            info.append(Paragraph('<b><i>Date:</i></b>', style=styles['Right']))
+            info.append(Paragraph('<b><i>Date:</i></b>',
+                                  style=styles['Right']))
             info.append(Spacer(1, 13))
         frmRgt1 = Frame(120*mm, 20*mm, width=25*mm, height=30*mm,
                         showBoundary=0)

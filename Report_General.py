@@ -67,7 +67,7 @@ class Report:
             rpt_data.append(element)
 
         # convert each string of data record from list to tuple
-        rpt_data = [tuple(l) for l in rpt_data]
+        rpt_data = [tuple(lin) for lin in rpt_data]
 
         # break long lines down into paragraph structure
         for lin in rpt_data:

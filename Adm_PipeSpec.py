@@ -28,10 +28,10 @@ class StrUpFrm(wx.Frame):
     def __init__(self):
 
         super(StrUpFrm, self).__init__(None, wx.ID_ANY,
-                          "Pipe Specification Start Up Screen",
-                          size=(400, 350),
-                          style=wx.DEFAULT_FRAME_STYLE &
-                          ~(wx.MAXIMIZE_BOX | wx.MINIMIZE_BOX))
+                                       "Pipe Specification Start Up Screen",
+                                       size=(400, 350),
+                                       style=wx.DEFAULT_FRAME_STYLE &
+                                       ~(wx.MAXIMIZE_BOX | wx.MINIMIZE_BOX))
 
         self.Bind(wx.EVT_CLOSE, self.OnClosePrt)
         self.InitUI()
@@ -122,10 +122,10 @@ class LoginFrm(wx.Dialog):
     def __init__(self, parent):
 
         super(LoginFrm, self).__init__(parent, title='Database Password',
-                           size=(350, 200),
-                           style=wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER
-                                                            | wx.MAXIMIZE_BOX
-                                                            | wx.MINIMIZE_BOX))
+                                       size=(350, 200),
+                                       style=wx.DEFAULT_FRAME_STYLE &
+                                       ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX
+                                         | wx.MINIMIZE_BOX))
         self.db_file = parent.path
         self.InitUI()
 
@@ -725,7 +725,7 @@ class BldFrm(wx.Panel):
                      'Original_HTW.html', 'Original_NCR.html',
                      'Original_MSR.html', 'Original_RPS.html']
         html_path = ''
-        
+
         # this should be the default location for the files
         os.chdir('..')
         filename = ('file:' + os.sep*2 + os.getcwd() + os.sep + 'Forms'
@@ -744,16 +744,20 @@ class BldFrm(wx.Panel):
                 filename = ('file:' + os.sep*2 + html_path
                             + os.sep + filenames[int(fileid)])
 
-        brwsr_lst = list(webbrowser._browsers.keys())
+        '''brwsr_lst = list(webbrowser._browsers.keys())
+
         all_brwsrs = ['firefox', 'safari', 'chrome', 'opera',
                       'netscape', 'google-chrome', 'lynx',
                       'mozilla', 'galeon', 'chromium',
                       'chromium-browser', 'windows-default', 'w3m']
-        select_brwsr = list(set(brwsr_lst) & set(all_brwsrs))[0]
 
-        if select_brwsr != '':
+        if list(set(brwsr_lst) & set(all_brwsrs)) != []:
+            select_brwsr = list(set(brwsr_lst) & set(all_brwsrs))[0]
             webbrowser.get(select_brwsr).open(filename, new=2)
-        else:
+        else:'''
+        try:
+            webbrowser.get(using=None).open(filename, new=2)
+        except Exception:
             wx.MessageBox('Problem Locating Web Browser', 'Error', wx.OK)
 
     def OnHTML(self, evt):
@@ -763,7 +767,11 @@ class BldFrm(wx.Panel):
         filename = self.FylDilog(wildcard, msg, wx.FD_OPEN |
                                  wx.FD_CHANGE_DIR)
         if filename != 'No File':
-            brwsr_lst = list(webbrowser._browsers.keys())
+            try:
+                webbrowser.get(using=None).open(filename, new=2)
+            except Exception:
+                wx.MessageBox('Problem Locating Web Browser', 'Error', wx.OK)
+            '''brwsr_lst = list(webbrowser._browsers.keys())
             all_brwsrs = ['firefox', 'safari', 'chrome', 'opera',
                           'netscape', 'google-chrome', 'lynx',
                           'mozilla', 'galeon', 'chromium',
@@ -773,7 +781,8 @@ class BldFrm(wx.Panel):
             if select_brwsr != '':
                 webbrowser.get(select_brwsr).open(filename, new=2)
             else:
-                wx.MessageBox('Problem Locating Web Browser', 'Error', wx.OK)
+                wx.MessageBox('Problem Locating Web Browser',
+                              'Error', wx.OK)'''
 
     def OnPDF(self, evt):
         PDFFrm(self)
@@ -803,8 +812,23 @@ class BldFrm(wx.Panel):
             chk_chkd = []
 
             # get the name of the form for proper selection of pdf formate
-            titl = [ttl.get_text() for ttl in soup.select('h1')][0]
-
+            if [ttl.get_text() for ttl in soup.select('h1')] == []:
+                msg = 'Program can only convert the following HTML Documents:\
+                \n\t\tHydrostatic Test Report,\n\
+                Hydrostatic Test Waiver,\n\
+                Nonconformance Report,\n\
+                Scope Of Work,\n\
+                Material Substitution or\n\
+                Request For New Specification'
+                dlg = wx.MessageDialog(self, message=msg,
+                                       caption="Invalid Document",
+                                       style=wx.OK)
+                dlg.ShowModal()
+                dlg.Destroy()
+                return
+            else:
+                titl = [ttl.get_text() for ttl in soup.select('h1')][0]
+            
             # get all the text input values
             for item in soup.find_all("input", {"type": "text"}):
                 id_txt.append(item.get('id'))
@@ -1511,11 +1535,12 @@ class CalcFrm(wx.Frame):
     def __init__(self, parent):
 
         super(CalcFrm, self).__init__(parent,
-                          title='Wall Thickness and Hydro-Test calculation',
-                          size=(580, 720),
-                          style=wx.DEFAULT_FRAME_STYLE & ~ (wx.RESIZE_BORDER |
-                                                            wx.MAXIMIZE_BOX |
-                                                            wx.MINIMIZE_BOX))
+                                      title='''Wall Thickness and
+                                       Hydro-Test calculation''',
+                                      size=(580, 720),
+                                      style=wx.DEFAULT_FRAME_STYLE &
+                                      ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX |
+                                        wx.MINIMIZE_BOX))
         self.lctrls = []
         self.parent = parent
 
@@ -2174,8 +2199,9 @@ class FlgRtgPnl(wx.Panel):
 class MergeFrm(wx.Frame):
     def __init__(self, parent):
 
-        super(MergeFrm, self).__init__(parent, title='Select pdf files to merge',
-                          size=(725, 550))
+        super(MergeFrm, self).__init__(parent,
+                                       title='Select pdf files to merge',
+                                       size=(725, 550))
 
         self.Bind(wx.EVT_CLOSE, self.OnExit)
         self.parent = parent
@@ -2290,7 +2316,7 @@ class RPSImport(wx.Frame):
         self.frmtitle = 'Request for New Pipe Specification'
 
         super(RPSImport, self).__init__(parent, title=self.frmtitle,
-                          size=(900, 880))
+                                        size=(900, 880))
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -3931,8 +3957,8 @@ class MSRImport(wx.Frame):
     def __init__(self, parent):
 
         self.frmtitle = 'Material Substitution Record'
-        super(MSRImport,self).__init__(parent, title=self.frmtitle,
-                          size=(880, 900))
+        super(MSRImport, self).__init__(parent, title=self.frmtitle,
+                                        size=(880, 900))
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -4785,7 +4811,7 @@ class MSRImport(wx.Frame):
 class BldTrvlSht(wx.Frame):
     '''Routine to build form and populate grid'''
     def __init__(self, parent, model=None):
-        
+
         self.parent = parent
         self.model = model
         self.Lvl2tbl = 'InspectionTravelSheet'
@@ -4798,7 +4824,10 @@ class BldTrvlSht(wx.Frame):
         else:
             frmtitle = (' '.join(re.findall('([A-Z][a-z]*)', self.Lvl2tbl)))
 
-        super(BldTrvlSht, self).__init__(parent, title=frmtitle, size=(1200, 875))
+        super(BldTrvlSht, self).__init__(parent,
+                                         title=frmtitle,
+                                         size=(1200, 875))
+
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         self.InitUI()
@@ -5268,12 +5297,14 @@ class BldConduit(wx.Frame):
         elif self.tblname == 'Piping':
             frmsz = (1000, 600)
 
-        super(BldConduit, self).__init__(parent, title=self.frmtitle, size=frmsz)
+        super(BldConduit, self).__init__(parent,
+                                         title=self.frmtitle,
+                                         size=frmsz)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         self.InitUI()
- 
+
     def InitUI(self):
         StartQry = None
 
@@ -6423,7 +6454,9 @@ class BldValve(wx.Frame):
             self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
                              self.tblname)))
 
-        super(BldValve, self).__init__(parent, title=self.frmtitle, size=(870, 680))
+        super(BldValve, self).__init__(parent,
+                                       title=self.frmtitle,
+                                       size=(870, 680))
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.InitUI()
@@ -9235,8 +9268,9 @@ class BldWeld(wx.Frame):
             self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
                              self.tblname)))
 
-        super(BldWeld, self).__init__(parent, title=self.frmtitle,
-                          size=(900, 720))
+        super(BldWeld, self).__init__(parent,
+                                      title=self.frmtitle,
+                                      size=(900, 720))
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -10808,7 +10842,9 @@ class BldInsul(wx.Frame):
                              self.tblname)))
         self.txtparts[0] = str(self.tblname[0]) + 'C'
 
-        super(BldInsul, self).__init__(parent, title=self.frmtitle, size=(830, 780))
+        super(BldInsul, self).__init__(parent,
+                                       title=self.frmtitle,
+                                       size=(830, 780))
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -12618,8 +12654,9 @@ class BldFst(wx.Frame):
             self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
                              self.tblname)))
 
-        super(BldFst, self).__init__(parent, title=self.frmtitle,
-                          size=(730, 430))
+        super(BldFst, self).__init__(parent,
+                                     title=self.frmtitle,
+                                     size=(730, 430))
 
         self.ComdPrtyID = ComdPrtyID
         self.PipeMtrSpec = ''
@@ -13419,7 +13456,9 @@ class BldLvl3(wx.Frame):
             self.frmtitle = (' '.join(re.findall('([A-Z][a-z]*)',
                              self.tblname)))
 
-        super(BldLvl3, self).__init__(parent, title=self.frmtitle, size=frmSize)
+        super(BldLvl3, self).__init__(parent,
+                                      title=self.frmtitle,
+                                      size=frmSize)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -14815,7 +14854,10 @@ class BldSpc_Nts(wx.Frame):
         else:
             frmtitle = (' '.join(re.findall('([A-Z][a-z]*)', self.Lvl2tbl)))
 
-        super(BldSpc_Nts, self).__init__(parent, title=frmtitle, size=(1200, 900))
+        super(BldSpc_Nts, self).__init__(parent,
+                                         title=frmtitle,
+                                         size=(1200, 900))
+
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         self.InitUI()
@@ -15586,8 +15628,9 @@ class BldSpc_Nts(wx.Frame):
 class SupportFrms(wx.Frame):
     def __init__(self, parent):
 
-        super(SupportFrms, self).__init__(parent, title='Direct Table Modification',
-                          size=(870, 700))
+        super(SupportFrms, self).__init__(parent,
+                                          title='Direct Table Modification',
+                                          size=(870, 700))
 
         self.parent = parent   # add for child parent form
 
