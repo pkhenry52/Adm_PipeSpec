@@ -740,25 +740,29 @@ class BldFrm(wx.Panel):
             if dlg.ShowModal() == wx.ID_OK:
                 html_path = dlg.GetPath()
             dlg.Destroy()
-            if html_path != '':
-                filename = ('file:' + os.sep*2 + html_path
-                            + os.sep + filenames[int(fileid)])
 
-        '''brwsr_lst = list(webbrowser._browsers.keys())
+        if html_path != '':
+            filename = ('file:' + os.sep*2 + html_path
+                        + os.sep + filenames[int(fileid)])
 
-        all_brwsrs = ['firefox', 'safari', 'chrome', 'opera',
-                      'netscape', 'google-chrome', 'lynx',
-                      'mozilla', 'galeon', 'chromium',
-                      'chromium-browser', 'windows-default', 'w3m']
+        if filename == '':
+            wx.MessageBox('Problem Locating HTML File', 'Error', wx.OK)
+        else:
+            '''brwsr_lst = list(webbrowser._browsers.keys())
 
-        if list(set(brwsr_lst) & set(all_brwsrs)) != []:
-            select_brwsr = list(set(brwsr_lst) & set(all_brwsrs))[0]
-            webbrowser.get(select_brwsr).open(filename, new=2)
-        else:'''
-        try:
-            webbrowser.get(using=None).open(filename, new=2)
-        except Exception:
-            wx.MessageBox('Problem Locating Web Browser', 'Error', wx.OK)
+            all_brwsrs = ['firefox', 'safari', 'chrome', 'opera',
+                        'netscape', 'google-chrome', 'lynx',
+                        'mozilla', 'galeon', 'chromium',
+                        'chromium-browser', 'windows-default', 'w3m']
+
+            if list(set(brwsr_lst) & set(all_brwsrs)) != []:
+                select_brwsr = list(set(brwsr_lst) & set(all_brwsrs))[0]
+                webbrowser.get(select_brwsr).open(filename, new=2)
+            else:'''
+            try:
+                webbrowser.get(using=None).open(filename, new=2)
+            except Exception:
+                wx.MessageBox('Problem Locating Web Browser', 'Error', wx.OK)
 
     def OnHTML(self, evt):
         # show the html file in browser
@@ -1533,10 +1537,9 @@ class PDFFrm(wx.Frame):
 
 class CalcFrm(wx.Frame):
     def __init__(self, parent):
-
+        ttl = 'Wall Thickness and Hydro-Test calculation'
         super(CalcFrm, self).__init__(parent,
-                                      title='''Wall Thickness and
-                                       Hydro-Test calculation''',
+                                      title=ttl,
                                       size=(580, 720),
                                       style=wx.DEFAULT_FRAME_STYLE &
                                       ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX |
