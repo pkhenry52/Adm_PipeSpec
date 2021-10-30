@@ -726,10 +726,16 @@ class BldFrm(wx.Panel):
                      'Original_MSR.html', 'Original_RPS.html']
         html_path = ''
 
-        # this should be the default location for the files
-        os.chdir('..')
-        filename = ('file:' + os.sep*2 + os.getcwd() + os.sep + 'Forms'
+        filename = (os.getcwd() + os.sep + 'Forms'
                     + os.sep + filenames[int(fileid)])
+
+        # this should be the default location for the files
+        if 'Data' in filename:
+            os.chdir('..')
+            filename = (os.getcwd() + os.sep + 'Forms'
+                        + os.sep + filenames[int(fileid)])
+
+        html_path = 'file:' + os.sep*2 + filename
 
         # if default location does not work then open directory finder
         if os.path.isfile(filename) is False:
@@ -741,28 +747,27 @@ class BldFrm(wx.Panel):
                 html_path = dlg.GetPath()
             dlg.Destroy()
 
-        if html_path != '':
-            filename = ('file:' + os.sep*2 + html_path
-                        + os.sep + filenames[int(fileid)])
+            if html_path != '':
+                filename = ''
 
         if filename == '':
             wx.MessageBox('Problem Locating HTML File', 'Error', wx.OK)
         else:
-            '''brwsr_lst = list(webbrowser._browsers.keys())
-
-            all_brwsrs = ['firefox', 'safari', 'chrome', 'opera',
-                        'netscape', 'google-chrome', 'lynx',
-                        'mozilla', 'galeon', 'chromium',
-                        'chromium-browser', 'windows-default', 'w3m']
-
-            if list(set(brwsr_lst) & set(all_brwsrs)) != []:
-                select_brwsr = list(set(brwsr_lst) & set(all_brwsrs))[0]
-                webbrowser.get(select_brwsr).open(filename, new=2)
-            else:'''
-            try:
-                webbrowser.get(using=None).open(filename, new=2)
-            except Exception:
-                wx.MessageBox('Problem Locating Web Browser', 'Error', wx.OK)
+            brwsrs = ['firefox', 'safari', 'chrome', 'opera',
+                      'netscape', 'google-chrome', 'lynx',
+                      'mozilla', 'galeon', 'chromium',
+                      'chromium-browser', 'windows-default',
+                      'w3m', 'no browser']
+            for brwsr in brwsrs:
+                if brwsr == 'no browser':
+                    wx.MessageBox('Problem Locating Web Browser',
+                                  'Error', wx.OK)
+                else:
+                    try:
+                        webbrowser.get(using=brwsr).open(html_path, new=2)
+                        break
+                    except Exception:
+                        pass
 
     def OnHTML(self, evt):
         # show the html file in browser
@@ -770,23 +775,18 @@ class BldFrm(wx.Panel):
         msg = 'Select HTML File to View'
         filename = self.FylDilog(wildcard, msg, wx.FD_OPEN |
                                  wx.FD_CHANGE_DIR)
-        if filename != 'No File':
-            try:
-                webbrowser.get(using=None).open(filename, new=2)
-            except Exception:
-                wx.MessageBox('Problem Locating Web Browser', 'Error', wx.OK)
-            '''brwsr_lst = list(webbrowser._browsers.keys())
-            all_brwsrs = ['firefox', 'safari', 'chrome', 'opera',
-                          'netscape', 'google-chrome', 'lynx',
-                          'mozilla', 'galeon', 'chromium',
-                          'chromium-browser', 'windows-default', 'w3m']
-            select_brwsr = list(set(brwsr_lst) & set(all_brwsrs))[0]
 
-            if select_brwsr != '':
-                webbrowser.get(select_brwsr).open(filename, new=2)
-            else:
-                wx.MessageBox('Problem Locating Web Browser',
-                              'Error', wx.OK)'''
+        if filename != 'No File':
+            brwsrs = ['firefox', 'safari', 'chrome', 'opera',
+                      'netscape', 'google-chrome', 'lynx',
+                      'mozilla', 'galeon', 'chromium',
+                      'chromium-browser', 'windows-default', 'w3m']
+            for brwsr in brwsrs:
+                try:
+                    webbrowser.get(using=brwsr).open(filename, new=2)
+                    break
+                except Exception:
+                    pass
 
     def OnPDF(self, evt):
         PDFFrm(self)
