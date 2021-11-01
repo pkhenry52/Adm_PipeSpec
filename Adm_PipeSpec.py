@@ -6621,7 +6621,7 @@ class BldValve(wx.Frame):
         for name in self.cmb_range:
             cmb_tbl = self.hints_tbls[name]
             cmbbox = wx.ComboCtrl(self, size=(200, -1))
-            self.Bind(wx.EVT_TEXT, self.OnSelect, cmbbox)
+            self.Bind(wx.EVT_COMBOBOX_CLOSEUP, self.OnSelect, cmbbox)
 
         # list of combo boxes to disable and have
         # hint = '1st Select Material Type'
@@ -6936,12 +6936,13 @@ class BldValve(wx.Frame):
         return data
 
     def NewTextStr(self):
-        s = ''
-        orderly = sorted(self.txtparts)
-        for n in orderly:
-            s = s + str(self.txtparts[n]) + '.'
-        s = s[:-1]
-        self.text1.ChangeValue(s)
+        if self.grid_select is False:
+            s = ''
+            orderly = sorted(self.txtparts)
+            for n in orderly:
+                s = s + str(self.txtparts[n]) + '.'
+            s = s[:-1]
+            self.text1.ChangeValue(s)
 
     def cmbSelected(self, cmbselect):
         i = int()
@@ -7003,8 +7004,6 @@ class BldValve(wx.Frame):
                                 ListCtrlComboPopup(tbl, PupQuery=query,
                                                    cmbvalue=cmbvalue,
                                                    showcol=2))
-
-        self.grid_select = False
 
     # this builds the ValveID text string
     def LblData(self, tbl_name, cmbvalue, condition=None):
@@ -7434,6 +7433,7 @@ class BldValve(wx.Frame):
         txtparts_values = self.text1.GetValue().split('.')
         txtparts_keys = list(range(len(txtparts_values)))
         self.txtparts = dict(zip(txtparts_keys, txtparts_values))
+        self.grid_select = True
 
         n = 2
         for cmbbox in self.cmbctrls:
@@ -7441,7 +7441,6 @@ class BldValve(wx.Frame):
             cmbbox.ChangeValue(str(self.data[rowGS][n]))
             n += 1
         self.notes.ChangeValue(self.data[rowGS][n])
-        self.grid_select = True
 
         cmbvalue = str(self.cmbctrls[4].GetValue())
 
@@ -7468,6 +7467,7 @@ class BldValve(wx.Frame):
         if self.ComdPrtyID is not None:
             self.b6.Enable()
 
+        self.grid_select = False
         self.b3.Enable()
         self.b2.Disable()
 
