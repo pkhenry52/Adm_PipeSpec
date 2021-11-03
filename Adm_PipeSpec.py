@@ -16466,7 +16466,7 @@ class CmbLst1(wx.Frame):
         self.edit_data = self.model.edit_data
         rowID = self.model.GetValueByRow(self.edit_data[0], self.ID_col)
         self.edit_data.append(rowID)
-
+        print(f'edit data = {self.edit_data} grid row, grid col, value, rowID')
         realnames = []
         for item in Dbase().Dcolinfo(self.Lvl1tbl):
             realnames.append(item[1])
@@ -16477,7 +16477,11 @@ class CmbLst1(wx.Frame):
         colID = self.ID_col
         colChgNum = self.edit_data[1]
         values = self.edit_data[2]
-        rowID = int(self.edit_data[3])
+        if self.Lvl1tbl == 'CommodityCodes':
+            rowID = self.edit_data[3]
+        else:
+            rowID = int(self.edit_data[3])
+
         colIDName = realnames[colID]
         colChgName = realnames[colChgNum]
 
@@ -16491,13 +16495,15 @@ class CmbLst1(wx.Frame):
                            ' WHERE ' + str(colIDName) + ' = ' + str(rowID))
         else:
             UpQuery = ('UPDATE ' + self.Lvl1tbl + ' SET ' + colChgName + ' = "'
-                       + str(values) + '" WHERE ' + str(colIDName) +
+                       + values + '" WHERE ' + str(colIDName) +
                        ' = "' + rowID + '"')
 
             # if the database ID col has been changed
             # then base the query on the new ID value
-            # if anyother column was changed
+            # if any other column was changed
             # then base the query on the original colID
+            '''The first part of this if loop is used only
+            for the Commmodity Codes table'''
             if colID == colChgNum:
                 check_query = ('SELECT * FROM ' + self.Lvl1tbl +
                                ' WHERE ' + str(colIDName) +
@@ -16506,8 +16512,13 @@ class CmbLst1(wx.Frame):
                 check_query = ('SELECT * FROM ' + self.Lvl1tbl + ' WHERE '
                                + str(colIDName) + ' = "' + rowID + '"')
 
-        Dbase().TblEdit(UpQuery)
+        '''When replacing the ID column as in the Commodity Code table the
+        REPLACE INTO positions(Commodity_Code, Commodity_Description, Notes)
+        VALUES ("NEW', "DELETE", "")
+        needs to be used and not an UPDATE statement'''
 
+        # update the database table with new entry
+        Dbase().TblEdit(UpQuery)
         # check to see if added row has been properly edited
         # if so enable the addrow button
         data_string = Dbase().Dsqldata(check_query)
