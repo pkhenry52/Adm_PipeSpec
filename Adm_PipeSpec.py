@@ -16466,21 +16466,22 @@ class CmbLst1(wx.Frame):
         self.edit_data = self.model.edit_data
         rowID = self.model.GetValueByRow(self.edit_data[0], self.ID_col)
         self.edit_data.append(rowID)
-        print(f'edit data = {self.edit_data} grid row, grid col, value, rowID')
         realnames = []
         for item in Dbase().Dcolinfo(self.Lvl1tbl):
             realnames.append(item[1])
 
-        enable_b2 = 0
+        enable_b2 = False
 
         # if just a cell is being edited then do the following
         colID = self.ID_col
         colChgNum = self.edit_data[1]
         values = self.edit_data[2]
-        if self.Lvl1tbl == 'CommodityCodes':
-            rowID = self.edit_data[3]
-        else:
+        # confirm the table ID is a number
+        # if it is alpha then plan on deleting row
+        if self.edit_data[3].isnumeric():
             rowID = int(self.edit_data[3])
+        else:
+            rowID = str(self.edit_data[3])
 
         colIDName = realnames[colID]
         colChgName = realnames[colChgNum]
@@ -16494,16 +16495,39 @@ class CmbLst1(wx.Frame):
             check_query = ('SELECT * FROM ' + self.Lvl1tbl +
                            ' WHERE ' + str(colIDName) + ' = ' + str(rowID))
         else:
-            UpQuery = ('UPDATE ' + self.Lvl1tbl + ' SET ' + colChgName + ' = "'
-                       + values + '" WHERE ' + str(colIDName) +
-                       ' = "' + rowID + '"')
+            # if the editing is the record ID then
+            # delete the row and re-add with new ID
+            dt = {}
+            if self.edit_data[1] == 0:
+                dt[realnames[0]] = self.edit_data[2]
+                for n in range(1, len(realnames)):
+                    dt[realnames[n]] = self.model.GetValueByRow(
+                        self.edit_data[0], n)
+                # delete the original data string with ID = Required
+                # first from the table
+                Dbase().TblDelete(self.Lvl1tbl,
+                                  'Required',
+                                  realnames[0])
+
+                UpQuery = ('INSERT INTO ' + self.Lvl1tbl +
+                           '(' + "'" +
+                           "','".join(list(map(str, dt.keys()))) + "'" + ')' +
+                           ' VALUES (' + "'" +
+                           "','".join(list(map(str, dt.values()))) + "'" + ')')
+                # then from the grid
+                self.OnDeleteRow(None)
+            else:
+                UpQuery = ('UPDATE ' + self.Lvl1tbl + ' SET ' + colChgName +
+                           ' = "' + values + '" WHERE ' + str(colIDName) +
+                           ' = "' + rowID + '"')
 
             # if the database ID col has been changed
             # then base the query on the new ID value
             # if any other column was changed
             # then base the query on the original colID
-            '''The first part of this if loop is used only
-            for the Commmodity Codes table'''
+            # The first part of this if loop is used only
+            # for the Commmodity Codes table which is only
+            # table where ID is changeable
             if colID == colChgNum:
                 check_query = ('SELECT * FROM ' + self.Lvl1tbl +
                                ' WHERE ' + str(colIDName) +
@@ -16512,26 +16536,26 @@ class CmbLst1(wx.Frame):
                 check_query = ('SELECT * FROM ' + self.Lvl1tbl + ' WHERE '
                                + str(colIDName) + ' = "' + rowID + '"')
 
-        '''When replacing the ID column as in the Commodity Code table the
-        REPLACE INTO positions(Commodity_Code, Commodity_Description, Notes)
-        VALUES ("NEW', "DELETE", "")
-        needs to be used and not an UPDATE statement'''
-
         # update the database table with new entry
         Dbase().TblEdit(UpQuery)
         # check to see if added row has been properly edited
         # if so enable the addrow button
         data_string = Dbase().Dsqldata(check_query)
         if 'Required' not in data_string[0]:
-            enable_b2 = 1
+            enable_b2 = True
 
         data = Dbase().Dsqldata(self.MainSQL)
 
         if enable_b2:
+            pass
             # if autoincrement is false then the data
             # can be sorted based on ID_col
-            if self.autoincrement == 0:
-                data.sort(key=lambda tup: tup[self.ID_col])
+        if self.autoincrement == 0:
+            data.sort(key=lambda tup: tup[self.ID_col])
+
+        self.model = DataMods(self.Lvl1tbl, data)
+        self.dvc.AssociateModel(self.model)
+        self.dvc.Refresh
 
     def AddTblRow(self):
         FldInfo = Dbase(self.Lvl1tbl).Fld_Size_Type()
@@ -17385,6 +17409,7 @@ class Dbase(object):
         else:
             DeQuery = ("DELETE FROM " + table + " WHERE "
                        + field + " = '" + val + "'")
+
         self.cursr.execute(DeQuery)
         self.db.commit()
 
