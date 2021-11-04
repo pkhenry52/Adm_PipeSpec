@@ -16364,7 +16364,7 @@ class CmbLst1(wx.Frame):
                   self.dvc)
 
         # if autoincrement is false then the data can be sorted based on ID_col
-        if self.autoincrement == 0:
+        if self.autoincrement is False:
             self.data.sort(key=lambda tup: tup[self.ID_col])
 
         # use the sorted data to load the dataviewlistcontrol
@@ -16515,7 +16515,7 @@ class CmbLst1(wx.Frame):
                            ' VALUES (' + "'" +
                            "','".join(list(map(str, dt.values()))) + "'" + ')')
                 # then from the grid
-                self.OnDeleteRow(None)
+#                self.OnDeleteRow(None)
             else:
                 UpQuery = ('UPDATE ' + self.Lvl1tbl + ' SET ' + colChgName +
                            ' = "' + values + '" WHERE ' + str(colIDName) +
@@ -16544,18 +16544,10 @@ class CmbLst1(wx.Frame):
         if 'Required' not in data_string[0]:
             enable_b2 = True
 
-        data = Dbase().Dsqldata(self.MainSQL)
-
-        if enable_b2:
-            pass
-            # if autoincrement is false then the data
-            # can be sorted based on ID_col
+        self.data = Dbase().Dsqldata(self.MainSQL)
         if self.autoincrement == 0:
-            data.sort(key=lambda tup: tup[self.ID_col])
-
-        self.model = DataMods(self.Lvl1tbl, data)
-        self.dvc.AssociateModel(self.model)
-        self.dvc.Refresh
+            self.data.sort(key=lambda tup: tup[self.ID_col])
+        self.model.Reset(len(self.data))
 
     def AddTblRow(self):
         FldInfo = Dbase(self.Lvl1tbl).Fld_Size_Type()
@@ -16603,7 +16595,7 @@ class CmbLst1(wx.Frame):
         self.data.append(values)
         self.model = DataMods(self.Lvl1tbl, self.data)
         self.dvc.AssociateModel(self.model)
-        self.dvc.Refresh
+        self.dvc.Refresh()
 
     def OnDeleteRow(self, evt):
         item = self.dvc.GetSelection()
@@ -17311,7 +17303,6 @@ class DataMods(dv.DataViewIndexListModel):
         return False
 
     def dedent(self, text):
-
         if text.startswith('\n'):
             # text starts with blank line, don't ignore the first line
             return textwrap.dedent(text)
@@ -17328,7 +17319,6 @@ class DataMods(dv.DataViewIndexListModel):
         return '\n'.join([first, rest])
 
     def wrap_paragraphs(self, text, ncols):
-
         paragraph_re = re.compile(r'\n(\s*\n)+', re.MULTILINE)
         text = self.dedent(text).strip()
         # every other entry is space
